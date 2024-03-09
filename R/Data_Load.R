@@ -5,7 +5,6 @@
 
 
 
-knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(fakir)
 library(charlatan)
