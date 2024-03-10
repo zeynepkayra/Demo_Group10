@@ -206,71 +206,52 @@ category$category_name <- unique(namess)
 
 set.seed(10)
 
+
 # ID
-transaction_id <- sample(610001:710000, 1000, replace = FALSE)
+transaction_id <- sample(610001:710000, 1500, replace = FALSE)
 transaction <- as_tibble(transaction_id)
 names(transaction)[names(transaction) == "value"] <- 'transaction_id'
 
 # Payment Method
 method <- c('Credit Card', 'Transfer', 'Pay at Door', 'PayPal', 'Debit Card', 'Voucher')
-types <- paste(sample(method, 1000, replace = TRUE))
+types <- paste(sample(method, 1500, replace = TRUE))
 transaction$payment_method <- types
-
-# Amount
-price <- rnorm(1000, mean = 505, sd = 60)
-rounded_prices <- round(price, 2)
-transaction$amount <- rounded_prices
 
 
 # ------------------
-
-
 
 # 6.Order Details Table
 
 set.seed(9)
 
 # ID
-order_details_id <- sample(510001:610000, 1000, replace = FALSE)
+order_details_id <- sample(510001:610000, 1500, replace = FALSE)
 order_detail <- as_tibble(order_details_id)
 names(order_detail)[names(order_detail) == "value"] <- 'order_detail_id'
-
-# Quantity
-quantity <- rgamma(1000, shape = 0.5, rate = 0.1) + 1
-quantity <- pmin(quantity, 10)
-
-rounded_quantity <- round(quantity)
-
-order_detail$quantity <- rounded_quantity
-
-# Total Price
-price <- rnorm(1000, mean = 505, sd = 60)
-rounded_prices <- round(price, 2)
-order_detail$total_price <- rounded_prices
 
 # Delivery Date
 start_date <- as.Date("2024-03-20")
 end_date <- as.Date("2024-08-20") 
 date_sequence <- seq.Date(start_date, end_date, by = "1 day")
 
-dates <- sample(date_sequence, 1000, replace = TRUE)
-order_detail$delivery_date <- dates
+dates <- sample(date_sequence, 1500, replace = TRUE)
+order_detail$delivery_date <- as.character(dates)
 
 # Discount
 lower_percentage <- seq(from = 5, to = 45, by = 5)
-lower_percentages <- sample(lower_percentage, 750, replace = TRUE)
+lower_percentages <- sample(lower_percentage, 1150, replace = TRUE)
 upper_percentage <- seq(from = 50, to = 75, by = 5)
-upper_percentages <- sample(upper_percentage, 250, replace = TRUE)
+upper_percentages <- sample(upper_percentage, 350, replace = TRUE)
 percentages <- c(lower_percentages, upper_percentages)
 order_detail$discount <- paste(percentages, '%', sep = '')
 
 # order_detail_id
 orderid_list <- c(order_detail$order_detail_id)
-transaction$order_detail_id <- sample(orderid_list, 1000, replace = FALSE)
+transaction$order_detail_id <- sample(orderid_list, 1500, replace = FALSE)
 
 # transaction_id added as a foreign key
 
-order_detail <- merge(x = order_detail, y = transaction, by = 'order_detail_id') %>% select(-payment_method, -amount)
+order_detail <- merge(x = order_detail, y = transaction, by = 'order_detail_id') %>% select(-payment_method)
 
 # ------------------
 
@@ -280,19 +261,73 @@ cat_id <- c(category$category_id)
 categories <- sample(cat_id, 1000, replace = TRUE)
 prod_id <- c(product$product_id)
 joint_in <- tibble(prod_id, categories)
-
-# Joint table for relation 'Order' including order_detail_id, customer_id, and product_id
-joint_order <- tibble(order_detail$order_detail_id, customer$customer_id, product$product_id)
-
 names(joint_in)[names(joint_in) == "prod_id"] <- 'product_id'
 names(joint_in)[names(joint_in) == "categories"] <- 'category_id'
+
+# Joint table for relation 'Order' including order_detail_id, customer_id, and product_id
+
+set.seed(2435345)
+my_function <- function(n) {
+  x_t <- data.frame(order_detail_id = integer(),
+                    customer_id = integer(),
+                    product_id = integer(),
+                    quantity = integer())
+  
+  for (i in 1:n) {
+    ch_order_detail_id <- order_detail$order_detail_id[i]
+    ch_customer_id <- sample(customer$customer_id, 1)
+    no_of_product <- as.integer(rexp(1, rate = 1/3))
+    y = product$product_id
+    
+    for (j in 1:no_of_product) {
+      ch_product_id <- sample(y, 1, replace = FALSE) 
+      quantity <- sample(1:5, 1)
+      
+      # Append to data frame
+      x_t <- rbind(x_t, data.frame(order_detail_id = ch_order_detail_id,
+                                   customer_id = ch_customer_id,
+                                   product_id = ch_product_id,
+                                   quantity = quantity))
+    }
+  }
+  
+  return(as_tibble(x_t))
+}
+
+
+
+result <- my_function(1500)
+
+# Data Validation for joint_order table
+# Remove any duplicate row/entry
+joint_order <- distinct(result, order_detail_id, customer_id, product_id, .keep_all = TRUE)
 names(joint_order)[names(joint_order) == "order_detail$order_detail_id"] <- 'order_detail_id'
 names(joint_order)[names(joint_order) == "customer$customer_id"] <- 'customer_id'
 names(joint_order)[names(joint_order) == "product$product_id"] <- 'product_id'
 
-
 # ------------------
 
+# Calculation of Total Price of Order_Detail table and Amount for Transaction
+new_table <- joint_order %>%
+  select(-customer_id) %>%
+  left_join(product %>% select(product_id, price), by = "product_id") %>%
+  mutate(Total = price * quantity) %>%
+  group_by(order_detail_id) %>%
+  summarize(Total_Sum = sum(Total))
+
+# Applying discounts to these prices given in Order Detail table
+
+new_table <- new_table %>% mutate(discount = as.numeric(sub("%", "", order_detail$discount)))  
+new_table <- new_table %>% mutate(total_price = Total_Sum*(1 - new_table$discount / 100))
+
+# Add total price to Order_Detail and Transaction Tables
+transaction <-  transaction %>%
+  left_join(new_table %>% select(order_detail_id, total_price), by = "order_detail_id")
+order_detail <- order_detail %>%
+  left_join(new_table %>% select(order_detail_id, total_price), by = "order_detail_id")
+
+order_detail <- order_detail[, c(1, 5, 2, 3, 4)]
+transaction <- transaction[, c(1, 2, 4, 3)]
 
 # # Data Integrity and Quality Check
 
@@ -334,6 +369,7 @@ if (length(duplicate_info) > 0) {
 customer$email <- gsub("'", "", customer$email)
 
 
+
 ## inserting fake data into schema 
 
 
@@ -352,5 +388,7 @@ dbWriteTable(my_db, "category", category, overwrite= TRUE)
 # Joint tables
 dbWriteTable(my_db, "joint_in", joint_in, overwrite= TRUE)
 dbWriteTable(my_db, "joint_order", joint_order, overwrite= TRUE)
+
+
 
 dbDisconnect(schema_db)

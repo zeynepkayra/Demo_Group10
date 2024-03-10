@@ -105,7 +105,7 @@ create_transaction <- '
 CREATE TABLE "transaction" (
   transaction_id INTEGER NOT NULL,
   payment_method VARCHAR(30),
-  amount DOUBLE,
+  total_price DOUBLE,
   order_detail_id INTEGER,
   PRIMARY KEY (transaction_id),
   FOREIGN KEY (order_detail_id) REFERENCES order_detail(order_detail_id)
@@ -118,7 +118,6 @@ dbExecute(schema_db, create_transaction)
 create_order_detail <- '
 CREATE TABLE order_detail (
   order_detail_id INTEGER NOT NULL,
-  quantity INTEGER,
   total_price DOUBLE,
   delivery_date DATE,
   discount DOUBLE,
@@ -136,6 +135,7 @@ CREATE TABLE joint_order (
   order_detail_id INTEGER NOT NULL,
   customer_id INTEGER NOT NULL,
   product_id INTEGER NOT NULL,
+  quantity INTEGER,
   FOREIGN KEY (order_detail_id) REFERENCES order_detail(order_detail_id)
   FOREIGN KEY (customer_id) REFERENCES customer(customer_id)
   FOREIGN KEY (product_id) REFERENCES product(product_id)
@@ -144,24 +144,6 @@ CREATE TABLE joint_order (
 # Execute the CREATE TABLE statement
 dbExecute(schema_db, create_joint_order)
 
-
-result <- dbGetQuery(schema_db, "SELECT order_detail_id, delivery_date FROM order_detail")
-result$delivery_date <- as.Date(result$delivery_date)
-print(result)
-
-for (i in 1:nrow(result)) {
-  order_detail_id <- result$order_detail_id[i]
-  delivery_date <- as.character(result$delivery_date[i])
-  
-  update_query <- sprintf("
-    UPDATE order_detail
-    SET delivery_date = '%s'
-    WHERE order_detail_id = %d
-  ", delivery_date, order_detail_id)
-  
-  # Execute the update query
-  dbExecute(schema_db, update_query)
-}
 
 dbDisconnect(schema_db)
 
