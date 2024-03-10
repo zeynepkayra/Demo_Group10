@@ -30,3 +30,7 @@ jobs:
       - name: Execute R script
         run: |
           Rscript R/Data_Load.R
+      - name: Add files
+        run: |
+          git config --global user.email "kiranlyy@gmail.com"
+          git config --global user.name "lyy"
