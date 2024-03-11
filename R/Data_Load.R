@@ -307,27 +307,8 @@ names(joint_order)[names(joint_order) == "product$product_id"] <- 'product_id'
 
 # ------------------
 
-# Calculation of Total Price of Order_Detail table and Amount for Transaction
-new_table <- joint_order %>%
-  select(-customer_id) %>%
-  left_join(product %>% select(product_id, price), by = "product_id") %>%
-  mutate(Total = price * quantity) %>%
-  group_by(order_detail_id) %>%
-  summarize(Total_Sum = sum(Total))
-
-# Applying discounts to these prices given in Order Detail table
-
-new_table <- new_table %>% mutate(discount = as.numeric(sub("%", "", order_detail$discount)))  
-new_table <- new_table %>% mutate(total_price = Total_Sum*(1 - new_table$discount / 100))
-
-# Add total price to Order_Detail and Transaction Tables
-transaction <-  transaction %>%
-  left_join(new_table %>% select(order_detail_id, total_price), by = "order_detail_id")
-order_detail <- order_detail %>%
-  left_join(new_table %>% select(order_detail_id, total_price), by = "order_detail_id")
-
-order_detail <- order_detail[, c(1, 5, 2, 3, 4)]
-transaction <- transaction[, c(1, 2, 4, 3)]
+order_detail <- order_detail[, c(1, 2, 3, 4)]
+transaction <- transaction[, c(1, 2, 3)]
 
 # # Data Integrity and Quality Check
 
@@ -388,6 +369,34 @@ dbWriteTable(my_db, "category", category, overwrite= TRUE)
 # Joint tables
 dbWriteTable(my_db, "joint_in", joint_in, overwrite= TRUE)
 dbWriteTable(my_db, "joint_order", joint_order, overwrite= TRUE)
+
+# Calculation of Total Price of Orders after Discounts are applied
+create_price_view <- '
+CREATE VIEW IF NOT EXISTS final_price_of_order AS
+SELECT 
+    order_detail_id,
+    total_price,
+    dis,
+    (total_price * (1 - (dis * 0.01))) AS discounted_price
+FROM (
+    SELECT 
+        (joint_order.quantity * product.price) AS total_price,
+        CAST(SUBSTR(CAST(order_detail.discount AS TEXT), 1, 2) AS INTEGER) AS dis, 
+        order_detail.order_detail_id
+    FROM 
+        product
+    JOIN 
+        joint_order ON product.product_id = joint_order.product_id
+    JOIN 
+        order_detail ON order_detail.order_detail_id = joint_order.order_detail_id
+) AS subquery
+GROUP BY order_detail_id;
+'
+
+dbExecute(schema_db, create_price_view)
+
+view_query <- 'SELECT * FROM final_price_of_order'
+view_result <- dbGetQuery(schema_db, view_query)
 
 
 

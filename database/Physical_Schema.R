@@ -26,7 +26,6 @@ create_supplier <- "
   );
 "
 
-# Execute the CREATE TABLE statement
 dbExecute(schema_db, create_supplier)
 
 
@@ -43,7 +42,7 @@ CREATE TABLE product (
   FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id)
 );
 '
-# Execute the CREATE TABLE statement
+
 dbExecute(schema_db, create_product)
 
 create_customer <- '
@@ -61,7 +60,7 @@ CREATE TABLE customer (
   PRIMARY KEY (customer_id)
 );
 '
-# Execute the CREATE TABLE statement
+
 dbExecute(schema_db, create_customer)
 
 
@@ -75,7 +74,7 @@ CREATE TABLE ad (
   FOREIGN KEY (product_id) REFERENCES product(product_id)
 );
 '
-# Execute the CREATE TABLE statement
+
 dbExecute(schema_db, create_ad)
 
 
@@ -86,7 +85,7 @@ CREATE TABLE category (
   PRIMARY KEY (category_id)
 );
 '
-# Execute the CREATE TABLE statement
+
 dbExecute(schema_db, create_category)
 
 
@@ -98,27 +97,25 @@ CREATE TABLE joint_in (
   FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
 '
-# Execute the CREATE TABLE statement
+
 dbExecute(schema_db, create_joint_in)
 
 create_transaction <- '
 CREATE TABLE "transaction" (
   transaction_id INTEGER NOT NULL,
   payment_method VARCHAR(30),
-  total_price DOUBLE,
   order_detail_id INTEGER,
   PRIMARY KEY (transaction_id),
   FOREIGN KEY (order_detail_id) REFERENCES order_detail(order_detail_id)
 );
 '
-# Execute the CREATE TABLE statement
+
 dbExecute(schema_db, create_transaction)
 
 
 create_order_detail <- '
 CREATE TABLE order_detail (
   order_detail_id INTEGER NOT NULL,
-  total_price DOUBLE,
   delivery_date DATE,
   discount DOUBLE,
   transaction_id INTEGER NOT NULL,
@@ -126,7 +123,7 @@ CREATE TABLE order_detail (
   FOREIGN KEY (transaction_id) REFERENCES "transaction"(transaction_id)
 );
 '
-# Execute the CREATE TABLE statement
+
 dbExecute(schema_db, create_order_detail)
 
 
@@ -141,9 +138,8 @@ CREATE TABLE joint_order (
   FOREIGN KEY (product_id) REFERENCES product(product_id)
 );
 '
-# Execute the CREATE TABLE statement
-dbExecute(schema_db, create_joint_order)
 
+dbExecute(schema_db, create_joint_order)
 
 dbDisconnect(schema_db)
 
