@@ -230,6 +230,7 @@ join order_detail O on A.order_detail_id = O.order_detail_id group by A.order_de
 
 dbExecute(schema_db, create_price_view)
 
+# Exhibit the view and calculated field(Total Price of Order)
 view_query <- 'SELECT * FROM final_price_of_order'
 view_result <- dbGetQuery(schema_db, view_query)
 
