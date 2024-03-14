@@ -13,3 +13,9 @@ library(RSQLite)
 schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
 ```
 
+```{r}
+# Read data
+customer_df <- dbReadTable(schema_db, "customer")
+
+```
+
