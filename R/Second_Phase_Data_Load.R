@@ -140,9 +140,42 @@ order_detail <- merge(x = order_detail, y = transaction, by = 'order_detail_id')
 
 # ------------------
 
+order_detail <- order_detail[, c(1, 2, 3, 4)]
+transaction <- transaction[, c(1, 2, 3)]
+
+# # Data Integrity and Quality Check
+
+
+# Formatting Email column in Customers Table
+customer$email <- gsub("'", "", customer$email)
+
+# Before inserting, we need to make a check for duplicates
+duplicate_check_customer <- 'SELECT customer_id, email, mobile_no from customer;'
+dbExecute(schema_db, duplicate_check_customer)
+customer_dup <- dbGetQuery(schema_db, duplicate_check_customer)
+customer_dup  <- as_tibble(customer_dup)
+
+duplicate_check_order <- 'SELECT order_detail_id from order_detail;'
+dbExecute(schema_db, duplicate_check_order)
+order_dup <- dbGetQuery(schema_db, duplicate_check_order)
+order_dup  <- as_tibble(order_dup)
+
+duplicate_check_trans <- 'SELECT transaction_id from "transaction";'
+dbExecute(schema_db, duplicate_check_trans)
+trans_dup <- dbGetQuery(schema_db, duplicate_check_trans)
+trans_dup  <- as_tibble(trans_dup)
+
+# Remove any duplicate row/entry
+unique_customer <- anti_join(customer, customer_dup, by = 'customer_id')
+unique_customer2 <- anti_join(unique_customer, customer_dup, by = 'email')
+unique_customer_fin <- anti_join(unique_customer2, customer_dup, by = 'mobile_no')
+unique_order <- anti_join(order_detail, order_dup, by = 'order_detail_id')
+unique_trans <- anti_join(transaction, trans_dup, by = 'transaction_id')
+unique_trans <- semi_join(transaction, unique_order, by = 'transaction_id')
+
 # Joint table for relation 'Order' including order_detail_id, customer_id, and product_id
 
-set.seed(2435347)
+set.seed(244773)
 my_function <- function(n) {
   x_t <- data.frame(order_detail_id = integer(),
                     customer_id = integer(),
@@ -150,13 +183,13 @@ my_function <- function(n) {
                     quantity = integer())
   
   for (i in 1:n) {
-    ch_order_detail_id <- order_detail$order_detail_id[i]
-    ch_customer_id <- sample(customer$customer_id, 1)
-    no_of_product <- as.integer(rexp(1, rate = 1/3))
-    y = product_idd
+    ch_order_detail_id <- unique_order$order_detail_id[i]
+    ch_customer_id <- sample(unique_customer_fin$customer_id, 1)
+    no_of_product <- as.integer(rexp(1, rate = 1/5))
+    y <- product_idd
     
     for (j in 1:no_of_product) {
-      ch_product_id <- sample(y, 1, replace = FALSE) 
+      ch_product_id <- sample(y$product_id, 1, replace = FALSE) 
       quantity <- sample(1:5, 1)
       
       # Append to data frame
@@ -170,12 +203,12 @@ my_function <- function(n) {
   return(as_tibble(x_t))
 }
 
-
-
+# Create 1000 rows
 result <- my_function(500)
 
+
 # Data Validation for joint_order table
-# Remove any duplicate row/entry
+
 joint_order <- distinct(result, order_detail_id, customer_id, product_id, .keep_all = TRUE)
 names(joint_order)[names(joint_order) == "order_detail$order_detail_id"] <- 'order_detail_id'
 names(joint_order)[names(joint_order) == "customer$customer_id"] <- 'customer_id'
@@ -183,50 +216,8 @@ names(joint_order)[names(joint_order) == "product$product_id"] <- 'product_id'
 
 # ------------------
 
-order_detail <- order_detail[, c(1, 2, 3, 4)]
-transaction <- transaction[, c(1, 2, 3)]
 
-# # Data Integrity and Quality Check
-
-
-# Testing for any duplication of primary keys or unique values
-
-duplicate_info <- character()
-
-unique_columns <- list(
-  "Customer_ID" = customer$customer_id,
-  "Email" = customer$email,
-  "Mobile_No" = customer$mobile_no,
-  "OrderDetail_ID" = order_detail$order_detail_id,
-  "product_id" = product$product_id,
-  "Transaction_ID" = transaction$transaction_id
-)
-
-for (col in names(unique_columns)) {
-  has_duplicates <- any(duplicated(unique_columns[[col]]))
-  
-  if (has_duplicates) {
-    duplicate_info <- c(duplicate_info, paste("Column", col, "has duplicate values"))
-  }
-}
-
-if (length(duplicate_info) > 0) {
-  cat("Columns with duplicate values:\n")
-  cat(duplicate_info, sep = "\n")
-} else {
-  print("No primary keys and unique values have duplicate values.")
-}
-
-
-
-# Formatting Email column in Customers Table
-customer$email <- gsub("'", "", customer$email)
-
-
-## inserting fake data into schema 
-
-
-# Insert fake data into the supplier table
+## Inserting fake data into schema 
 
 
 my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
@@ -236,8 +227,6 @@ dbWriteTable(my_db, "customer", customer, append= TRUE)
 
 # Joint tables
 dbWriteTable(my_db, "joint_order", joint_order, append= TRUE)
-
-
 
 # Calculation of Total Price of Orders after Discounts are applied
 create_price_view <- '
