@@ -13,3 +13,42 @@ library(RSQLite)
 schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
 ```
 
+```{r}
+# Read data
+table_name <- dbListTables(schema_db)
+tables <- list()
+for (name in table_name){
+  tables[[name]] <- dbReadTable(schema_db, name)
+}
+```
+
+```{r}
+category_table <- tables[["category"]]
+
+```
+
+
+```{r}
+# Payment methods
+
+```
+
+```{r}
+# Best sellers for each category
+
+```
+
+```{r}
+# Which category is the most popular
+
+
+```
+
+```{r}
+# Top 20 customers 
+```
+
+```{r}
+# which product has the highest rating in each category
+```
+
