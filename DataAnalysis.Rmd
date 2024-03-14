@@ -10,6 +10,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(RSQLite)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+
+```{r}
 schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
 ```
 
@@ -23,29 +30,84 @@ for (name in table_name){
 ```
 
 ```{r}
-category_table <- tables[["category"]]
-
+joint_in_table <- tables[["joint_in"]]
+joint_order_table <- tables[["joint_order"]]
 ```
-
 
 ```{r}
 # Payment methods
-
+transaction_table <- tables[["transaction"]]
+ggplot(transaction_table, aes(x = payment_method)) +
+  geom_bar(binwidth = 1) +
+  labs(x = "Payment Method", y = "Count")
 ```
 
 ```{r}
 # Best sellers for each category
+product_table <- tables[["product"]]
+category_table <- tables[["category"]]
 
+bsec <- product_table %>% 
+  left_join(joint_in_table, by = "product_id") %>%
+  left_join(category_table, by = "category_id") %>%
+  left_join(joint_order_table, by = "product_id")
+
+total_sales_by_category <- bsec %>% group_by(product_name, category_name) %>%
+  summarise(total_quantity = sum(quantity), .groups = 'drop')
+
+best_sellers <- total_sales_by_category %>%
+  group_by(category_name) %>%
+  slice_max(order_by = total_quantity, n = 1) %>%
+  ungroup()
 ```
 
 ```{r}
 # Which category is the most popular
+
+install.packages("tidyr")
+library(tidyr)
+install.packages("ggplot2")
+library(ggplot2)
+install.packages("tidyverse")
+library(tidyverse)
+
+# Load required libraries
+library(tidyverse)
+
+category_table <- tables[["category"]]
+product_table <- tables[["product"]]
+customer_table <- tables[["customer"]]
+joint_in_table <- tables[["joint_in"]]
+product_table
+
+# Step 1: Join the product and category tables using the joint table
+product_category_join <- joint_in_table%>%
+  inner_join(product_table, by = "product_id") %>%
+  inner_join(category_table, by = "category_id")
+
+# Step 2: Aggregate the data to count occurrences of each category
+category_counts <- product_category_join %>%
+  group_by(category_name) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+# Step 3: Print or visualize the results to identify the most popular category
+most_popular_category <- category_counts$category_name[1]
+print(paste("The most popular category is:", most_popular_category))
+
+
+ggplot(category_counts, aes(x = reorder(category_name, -count), y = count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(x = "Category", y = "Number of Products", title = "Popularity of Categories") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  coord_flip()
 
 
 ```
 
 ```{r}
 # Top 20 customers 
+
 ```
 
 ```{r}
