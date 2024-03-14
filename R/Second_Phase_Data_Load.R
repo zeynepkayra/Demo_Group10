@@ -14,6 +14,8 @@ library(RSQLite)
 
 schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
 
+# Some of the remaining data is generated and then uploaded to the database after validation of data
+
 # 1.Customers Table
 
 set.seed(1000)
