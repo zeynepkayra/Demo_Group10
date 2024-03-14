@@ -8,25 +8,13 @@ library(RSQLite)
 schema_db <- dbConnect(RSQLite::SQLite(), "ECommerce.db")
 
 create_price_view <- '
-CREATE VIEW IF NOT EXISTS final_price_of_order AS
-SELECT 
-    order_detail_id,
-    total_price,
-    dis,
-    (total_price * (1 - (dis * 0.01))) AS discounted_price
-FROM (
-    SELECT 
-        (joint_order.quantity * product.price) AS total_price,
-        CAST(SUBSTR(CAST(order_detail.discount AS TEXT), 1, 2) AS INTEGER) AS dis, 
-        order_detail.order_detail_id
-    FROM 
-        product
-    JOIN 
-        joint_order ON product.product_id = joint_order.product_id
-    JOIN 
-        order_detail ON order_detail.order_detail_id = joint_order.order_detail_id
-) AS subquery
-GROUP BY order_detail_id;
+
+CREATE VIEW IF NOT EXISTS final_price_of_order AS select order_detail_id, subtotal, discount, subtotal*(1-discount*0.01) as final_price from 
+(select A.order_detail_id, count(A.product_id) as no_of_products, sum(A.total_price_for_each_product) as subtotal, O.discount from 
+(select J.order_detail_id, J.product_id, P.price, J.quantity, (P.price* J.quantity) as total_price_for_each_product from joint_order J join product p where J.product_id = P.product_id) A 
+join order_detail O on A.order_detail_id = O.order_detail_id group by A.order_detail_id); 
+
+
 '
 
 dbExecute(schema_db, create_price_view)
