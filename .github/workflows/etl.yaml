@@ -27,10 +27,21 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           Rscript -e 'install.packages(c("ggplot2", "dplyr", "readr", "tidyr", "RSQLite", "fakir", "charlatan", "generator"))'
-      - name: Execute R script
+      - name: Execute R script to load first phase of the data to database
         run: |
           Rscript R/First_Phase_Data_Load.R
+      - name: Execute R script to load update the database with new entry (second data phase)
+        run: |
+          Rscript R/Second_Phase_Data_Load.R
       - name: Add files
         run: |
           git config --global user.email "kiranlyy@gmail.com"
           git config --global user.name "lyy"
+      - name: Commit files
+        run: |
+          git commit -m "Add analysis results"
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            branch: main
