@@ -37,6 +37,9 @@ jobs:
         run: |
           git config --global user.email "kiranlyy@gmail.com"
           git config --global user.name "lyy"
+      - name: Add modified files
+        run: |
+          git add .
       - name: Commit files
         run: |
           git commit -m "Add analysis results"
