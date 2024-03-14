@@ -78,127 +78,12 @@ customer <- customer[, c(1, 4, 2, 3, 5, 6, 7, 8, 9, 10)]
 
 # ------------------
 
-# 2.Suppliers Table
-
-set.seed(5)
-
-# ID
-supplier_id <- sample(210001:310000, 30, replace = FALSE)
-Suppliers <- as_tibble(supplier_id)
-names(Suppliers)[names(Suppliers) == "value"] <- "Supplier_ID"
-
-# Name
-supplier_names <- c("Astonville Electronics", 'GlobalTech', 'Estelle', 'Quantin', 'Nexius', 'Oxley', 'Black Horse', 'Zirkon', 'United', 'Velocity Technologies', 'Crescent', 'Starley Mechanics', 'Xander Gray', 'Foster', 'Swifters', 'Red Rabbit', 'Welness House', 'Gary Martin', 'Dirty Duck', 'PJ', 'HealthX', 'Rugby', 'North Warwick Foundation', 'Smart Beta', 'Future World', 'Leicester', 'EcoHealth', 'Venus', 'Boots', 'Maxtra')
-abbrev <- c('Group', 'Co.', 'Services')
-
-fake_supplier_names <- replicate(30, paste(sample(supplier_names, 1), sample(abbrev, 1, replace = TRUE), sep = " "))
-Suppliers$Supplier_Name <- fake_supplier_names
-
-# Rating
-rating <- rgamma(30, shape = 5, rate = 1)
-rating <- pmin(rating, 5)
-Suppliers$Rating <- round(rating, 1)
-
-# Country
-supplier_country <- c("UK", "Ireland")
-country_elements <- paste(sample(supplier_country, 30, replace = TRUE))
-Suppliers$Country <- country_elements
-
-# Street Name
-supplier_streets <- c("Maple", "Main", "Oak", "Elm", "Cedar", "High", "Park", "Station", "Green", "Hill", 'Oxford', 'Liverpool', 'Westwood', 'Scarman', 'Gibbet Hill', 'Stoneleigh', 'Earlsdon', 'Lynchgate', 'Centenary', 'New', 'Moore', 'Abberton', 'Davenport', 'Cryfield', 'Lillington', 'Starley', 'Renown', 'Lakewood', 'Glasgow', 'Warwick', 'Stratford', 'Leighton', 'Chelsea', 'Dublin', 'Galway')
-fake_streets <- paste(sample(supplier_streets, 30, replace = TRUE))
-
-Suppliers$Street_Name <- fake_streets
-
-# House No
-house_noo <- sample(1:75, 30, replace = TRUE)
-Suppliers$House_No <- house_noo
-
-# Postcode
-fake_postcodess <- paste0(sample(LETTERS, 30, replace = TRUE), sample(LETTERS, 30, replace = TRUE), sample(0:9, 30, replace = TRUE), " ", sample(0:9, 30, replace = TRUE), sample(LETTERS, 30, replace = TRUE), sample(LETTERS, 30, replace = TRUE))
-Suppliers$Postcode <- fake_postcodess
-
-# ------------------
-
-# 3.Products Table
-
-set.seed(6)
-
-product<- fake_products(1000)
-category_column <- c(product$category)
-product <- product %>% select(-color, -body_location, -sent_from, -category)
-names(product)[names(product) == "name"] <- "product_name"
-names(product)[names(product) == "price"] <- "price"
-names(product)[names(product) == "id"] <- "product_id"
-names(product)[names(product) == "brand"] <- "brand"
-
-# Brand
-split_brand <- function(x) {
-  separated <- separate(data.frame(x), x, into = c("Name1", "Name2"), sep = "[-,]", remove = FALSE, fill = "right")
-  separated$Name2 <- ifelse(is.na(separated$Name2), separated$Name1, separated$Name2)
-  return(separated)
-}
-split_data <- split_brand(product$brand)
-
-product <- cbind(product, split_data)
-product <- product %>% select(-brand, -x, -Name2)
-names(product)[names(product) == "Name1"] <- "brand"
-
-# Rating
-ratingg <- rgamma(1000, shape = 5, rate = 1)
-ratingg <- pmin(ratingg, 5)
-product$rating <- round(ratingg, 1)
-
-# Availability
-availability <- c("True", "False")
-availability <- paste(sample(availability, 1000, replace = TRUE))
-product$availability <- availability
-# Supplier id
-supplierid_list <- c(Suppliers$Supplier_ID)
-product$supplier_id <- sample(supplierid_list, 1000, replace = TRUE)
-
-# Adjust the columns to fit database
-product <- product[, c(3, 1, 4, 2, 5, 6, 7)]
-
-# ------------------
-
-# 4.Ads Table
-
-set.seed(7)
-
-# ID
-ad_id <- sample(310001:410000, 1000, replace = FALSE)
-
-ad <- as_tibble(ad_id)
-names(ad)[names(ad) == "value"] <- "ad_id"
-
-# Duration
-duration <- runif(1000, min = 0, max = 1) * 2
-ad$duration <- round(duration,2)
-
-# Cost
-cost <- runif(1000, min = 0, max = 1) * 50
-ad$cost <- round(cost,2)
-
-# product_id
-productid_list <- c(product$product_id)
-ad$product_id <- sample(productid_list, 1000, replace = FALSE)
-
-# ------------------
-
-# 5.Category Table
-
-set.seed(8)
-
-# ID
-category_id <- sample(410001:510000, 8, replace = FALSE)
-category <- as_tibble(category_id)
-names(category)[names(category) == "value"] <- "category_id"
-
-# Name
-namess <- category_column
-category$category_name <- unique(namess)
-
+# Extracting product_id using SQL query
+create_product_id_query <- 'SELECT product_id FROM product;
+'
+dbExecute(schema_db, create_product_id_query)
+product_idd <- dbGetQuery(schema_db, create_product_id_query)
+product_idd <- as_tibble(product_idd)
 
 # ------------------
 
@@ -255,18 +140,9 @@ order_detail <- merge(x = order_detail, y = transaction, by = 'order_detail_id')
 
 # ------------------
 
-
-# Joint table for relation 'In' including category_id and product_id as foreign keys
-cat_id <- c(category$category_id)
-categories <- sample(cat_id, 1000, replace = TRUE)
-prod_id <- c(product$product_id)
-joint_in <- tibble(prod_id, categories)
-names(joint_in)[names(joint_in) == "prod_id"] <- 'product_id'
-names(joint_in)[names(joint_in) == "categories"] <- 'category_id'
-
 # Joint table for relation 'Order' including order_detail_id, customer_id, and product_id
 
-set.seed(2435346)
+set.seed(2435347)
 my_function <- function(n) {
   x_t <- data.frame(order_detail_id = integer(),
                     customer_id = integer(),
@@ -277,7 +153,7 @@ my_function <- function(n) {
     ch_order_detail_id <- order_detail$order_detail_id[i]
     ch_customer_id <- sample(customer$customer_id, 1)
     no_of_product <- as.integer(rexp(1, rate = 1/3))
-    y = product$product_id
+    y = product_idd
     
     for (j in 1:no_of_product) {
       ch_product_id <- sample(y, 1, replace = FALSE) 
@@ -321,10 +197,7 @@ unique_columns <- list(
   "Customer_ID" = customer$customer_id,
   "Email" = customer$email,
   "Mobile_No" = customer$mobile_no,
-  "Supplier_ID" = Suppliers$Supplier_ID,
-  "Category_ID" = category$category_id,
   "OrderDetail_ID" = order_detail$order_detail_id,
-  "ad_id" = ad$ad_id,
   "product_id" = product$product_id,
   "Transaction_ID" = transaction$transaction_id
 )
@@ -350,7 +223,6 @@ if (length(duplicate_info) > 0) {
 customer$email <- gsub("'", "", customer$email)
 
 
-
 ## inserting fake data into schema 
 
 
@@ -358,17 +230,14 @@ customer$email <- gsub("'", "", customer$email)
 
 
 my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
-dbWriteTable(my_db, "supplier", Suppliers, overwrite = TRUE)
-dbWriteTable(my_db, "product",product, overwrite= TRUE)
-dbWriteTable(my_db, "ad", ad, overwrite= TRUE)
-dbWriteTable(my_db, "transaction", transaction, overwrite= TRUE)
-dbWriteTable(my_db, "order_detail", order_detail, overwrite= TRUE)
-dbWriteTable(my_db, "customer", customer, overwrite= TRUE)
-dbWriteTable(my_db, "category", category, overwrite= TRUE)
+dbWriteTable(my_db, "transaction", transaction, append= TRUE)
+dbWriteTable(my_db, "order_detail", order_detail, append= TRUE)
+dbWriteTable(my_db, "customer", customer, append= TRUE)
 
 # Joint tables
-dbWriteTable(my_db, "joint_in", joint_in, overwrite= TRUE)
-dbWriteTable(my_db, "joint_order", joint_order, overwrite= TRUE)
+dbWriteTable(my_db, "joint_order", joint_order, append= TRUE)
+
+
 
 # Calculation of Total Price of Orders after Discounts are applied
 create_price_view <- '
