@@ -1,5 +1,5 @@
 
-#title: "Physical_Schema"
+#title: "Second Phase Data Load"
 #output: html_document
 #date: "2024-03-01"
 
@@ -10,14 +10,9 @@ library(fakir)
 library(charlatan)
 library(generator)
 library(tidyr)
-
-
-
-
 library(RSQLite)
+
 schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
-
-
 
 # 1.Customers Table
 
@@ -43,7 +38,6 @@ customer <- customer %>%
   separate(name, into = c("First_Name", "Last_Name"), sep = " ")
 customer <- customer %>% select(-name_modified)
 
-
 # 1000 fake phone numbers
 lower_limit <- 4400000000000
 upper_limit <- 4499999999999
@@ -51,13 +45,11 @@ fake_mobile_numbers <- runif(100, min = 0, max = 1) * (upper_limit - lower_limit
 
 customer$mobile_no <- paste("+", as.character(round(fake_mobile_numbers)), sep = "")
 
-
 # Credit Card Number
 customer$credit_card_no <- ch_credit_card_number(n = 100)
 
 # Country
 customer$country <- "UK"
-
 
 # Street Names
 street_elements <- c("Maple", "Main", "Oak", "Elm", "Cedar", "High", "Park", "Station", "Green", "Hill", 'Oxford', 'Liverpool', 'Westwood', 'Scarman', 'Gibbet Hill', 'Stoneleigh', 'Earlsdon', 'Lynchgate', 'Centenary', 'New', 'Moore', 'Abberton', 'Davenport', 'Cryfield', 'Lillington', 'Starley', 'Renown', 'Lakewood', 'Glasgow', 'Warwick', 'Stratford', 'Leighton', 'Chelsea')
@@ -91,7 +83,6 @@ product_idd <- as_tibble(product_idd)
 
 set.seed(1001)
 
-
 # ID
 transaction_id <- sample(610001:710000, 500, replace = FALSE)
 transaction <- as_tibble(transaction_id)
@@ -101,7 +92,6 @@ names(transaction)[names(transaction) == "value"] <- 'transaction_id'
 method <- c('Credit Card', 'Transfer', 'Pay at Door', 'PayPal', 'Debit Card', 'Voucher')
 types <- paste(sample(method, 500, replace = TRUE))
 transaction$payment_method <- types
-
 
 # ------------------
 
@@ -145,11 +135,11 @@ transaction <- transaction[, c(1, 2, 3)]
 
 # # Data Integrity and Quality Check
 
-
 # Formatting Email column in Customers Table
 customer$email <- gsub("'", "", customer$email)
 
-# Before inserting, we need to make a check for duplicates
+# Before inserting, we need to make a check for duplicates by making comparison with the existing database table values
+
 duplicate_check_customer <- 'SELECT customer_id, email, mobile_no from customer;'
 dbExecute(schema_db, duplicate_check_customer)
 customer_dup <- dbGetQuery(schema_db, duplicate_check_customer)
@@ -228,6 +218,8 @@ dbWriteTable(my_db, "customer", customer, append= TRUE)
 # Joint tables
 dbWriteTable(my_db, "joint_order", joint_order, append= TRUE)
 
+# ------------------
+
 # Calculation of Total Price of Orders after Discounts are applied
 create_price_view <- '
 CREATE VIEW IF NOT EXISTS final_price_of_order AS select order_detail_id, subtotal, discount, subtotal*(1-discount*0.01) as final_price from 
@@ -240,7 +232,5 @@ dbExecute(schema_db, create_price_view)
 
 view_query <- 'SELECT * FROM final_price_of_order'
 view_result <- dbGetQuery(schema_db, view_query)
-
-
 
 dbDisconnect(schema_db)

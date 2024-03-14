@@ -1,5 +1,5 @@
 
-#title: "Physical_Schema"
+#title: "First Phase of Data Load"
 #output: html_document
 #date: "2024-03-01"
 
@@ -10,14 +10,9 @@ library(fakir)
 library(charlatan)
 library(generator)
 library(tidyr)
-
-
-
-
 library(RSQLite)
+
 schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
-
-
 
 # 1.Customers Table
 
@@ -43,7 +38,6 @@ customer <- customer %>%
   separate(name, into = c("First_Name", "Last_Name"), sep = " ")
 customer <- customer %>% select(-name_modified)
 
-
 # 1000 fake phone numbers
 lower_limit <- 4400000000000
 upper_limit <- 4499999999999
@@ -51,13 +45,11 @@ fake_mobile_numbers <- runif(1000, min = 0, max = 1) * (upper_limit - lower_limi
 
 customer$mobile_no <- paste("+", as.character(round(fake_mobile_numbers)), sep = "")
 
-
 # Credit Card Number
 customer$credit_card_no <- ch_credit_card_number(n = 1000)
 
 # Country
 customer$country <- "UK"
-
 
 # Street Names
 street_elements <- c("Maple", "Main", "Oak", "Elm", "Cedar", "High", "Park", "Station", "Green", "Hill", 'Oxford', 'Liverpool', 'Westwood', 'Scarman', 'Gibbet Hill', 'Stoneleigh', 'Earlsdon', 'Lynchgate', 'Centenary', 'New', 'Moore', 'Abberton', 'Davenport', 'Cryfield', 'Lillington', 'Starley', 'Renown', 'Lakewood', 'Glasgow', 'Warwick', 'Stratford', 'Leighton', 'Chelsea')
@@ -153,6 +145,7 @@ product$rating <- round(ratingg, 1)
 availability <- c("True", "False")
 availability <- paste(sample(availability, 1000, replace = TRUE))
 product$availability <- availability
+
 # Supplier id
 supplierid_list <- c(Suppliers$Supplier_ID)
 product$supplier_id <- sample(supplierid_list, 1000, replace = TRUE)
@@ -199,13 +192,11 @@ names(category)[names(category) == "value"] <- "category_id"
 namess <- category_column
 category$category_name <- unique(namess)
 
-
 # ------------------
 
 # 7.Transactions Table
 
 set.seed(10)
-
 
 # ID
 transaction_id <- sample(610001:710000, 1500, replace = FALSE)
@@ -216,7 +207,6 @@ names(transaction)[names(transaction) == "value"] <- 'transaction_id'
 method <- c('Credit Card', 'Transfer', 'Pay at Door', 'PayPal', 'Debit Card', 'Voucher')
 types <- paste(sample(method, 1500, replace = TRUE))
 transaction$payment_method <- types
-
 
 # ------------------
 
@@ -255,8 +245,9 @@ order_detail <- merge(x = order_detail, y = transaction, by = 'order_detail_id')
 
 # ------------------
 
-
 # Joint table for relation 'In' including category_id and product_id as foreign keys
+set.seed(647823)
+
 cat_id <- c(category$category_id)
 categories <- sample(cat_id, 1000, replace = TRUE)
 prod_id <- c(product$product_id)
@@ -294,8 +285,6 @@ my_function <- function(n) {
   return(as_tibble(x_t))
 }
 
-
-
 result <- my_function(1500)
 
 # Data Validation for joint_order table
@@ -311,7 +300,6 @@ order_detail <- order_detail[, c(1, 2, 3, 4)]
 transaction <- transaction[, c(1, 2, 3)]
 
 # # Data Integrity and Quality Check
-
 
 # Testing for any duplication of primary keys or unique values
 
@@ -345,17 +333,11 @@ if (length(duplicate_info) > 0) {
 }
 
 
-
 # Formatting Email column in Customers Table
 customer$email <- gsub("'", "", customer$email)
 
 
-
-## inserting fake data into schema 
-
-
-# Insert fake data into the supplier table
-
+## Inserting fake data into database
 
 my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 dbWriteTable(my_db, "supplier", Suppliers, overwrite = TRUE)
@@ -370,7 +352,10 @@ dbWriteTable(my_db, "category", category, overwrite= TRUE)
 dbWriteTable(my_db, "joint_in", joint_in, overwrite= TRUE)
 dbWriteTable(my_db, "joint_order", joint_order, overwrite= TRUE)
 
+# ------------------
+
 # Calculation of Total Price of Orders after Discounts are applied
+
 create_price_view <- '
 CREATE VIEW IF NOT EXISTS final_price_of_order AS select order_detail_id, subtotal, discount, subtotal*(1-discount*0.01) as final_price from 
 (select A.order_detail_id, count(A.product_id) as no_of_products, sum(A.total_price_for_each_product) as subtotal, O.discount from 
@@ -382,7 +367,5 @@ dbExecute(schema_db, create_price_view)
 
 view_query <- 'SELECT * FROM final_price_of_order'
 view_result <- dbGetQuery(schema_db, view_query)
-
-
 
 dbDisconnect(schema_db)
