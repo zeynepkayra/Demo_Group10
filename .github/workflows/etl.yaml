@@ -33,6 +33,9 @@ jobs:
       - name: Execute R script to load update the database with new entry (second data phase)
         run: |
           Rscript R/Second_Phase_Data_Load.R
+      - name: Execute R script to validate email, mobile number, and postcode
+        run: |
+          Rscript R/Github_Action.R
       - name: Add collaborator 1
         run: |
           git config --global user.email "kiranlyy@gmail.com"
