@@ -164,7 +164,6 @@ unique_trans <- semi_join(transaction, unique_order, by = 'transaction_id')
 
 # Joint table for relation 'Order' including order_detail_id, customer_id, and product_id
 
-set.seed(244773)
 my_function <- function(n) {
   x_t <- data.frame(order_detail_id = integer(),
                     customer_id = integer(),
