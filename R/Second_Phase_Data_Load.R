@@ -184,6 +184,9 @@ my_function <- function(n) {
       ch_product_id <- sample(y$product_id, 1, replace = FALSE) 
       quantity <- sample(1:5, 1)
       
+      print(ch_product_id)
+      print(quantity)
+      
       # Append to data frame
       x_t <- rbind(x_t, data.frame(order_detail_id = ch_order_detail_id,
                                    customer_id = ch_customer_id,
@@ -195,7 +198,7 @@ my_function <- function(n) {
   return(as_tibble(x_t))
 }
 
-# Create 1000 rows
+# Create 1000 rows 
 result <- my_function(500)
 
 
