@@ -52,13 +52,19 @@ bsec <- product_table %>%
   left_join(category_table, by = "category_id") %>%
   left_join(joint_order_table, by = "product_id")
 
-total_sales_by_category <- bsec %>% group_by(product_name, category_name) %>%
-  summarise(total_quantity = sum(quantity), .groups = 'drop')
-
-best_sellers <- total_sales_by_category %>%
+best_sellers <- bsec %>%
+  group_by(category_name, product_name) %>%
+  summarise(total_quantity = sum(quantity), .groups = 'drop') %>%
   group_by(category_name) %>%
-  slice_max(order_by = total_quantity, n = 1) %>%
+  arrange(desc(total_quantity)) %>%
+  slice(1) %>% 
   ungroup()
+
+ggplot(best_sellers) +
+  geom_bar(aes(x = product_name, y = total_quantity, fill = category_name), 
+           stat = "identity") + 
+  labs(x = "Products", y = "Quantity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 ```{r}
@@ -101,8 +107,6 @@ ggplot(category_counts, aes(x = reorder(category_name, -count), y = count)) +
   labs(x = "Category", y = "Number of Products", title = "Popularity of Categories") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   coord_flip()
-
-
 ```
 
 ```{r}
