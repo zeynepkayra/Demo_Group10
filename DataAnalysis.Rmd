@@ -15,7 +15,6 @@ library(tidyr)
 library(ggplot2)
 ```
 
-
 ```{r}
 schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
 ```
@@ -38,7 +37,7 @@ joint_order_table <- tables[["joint_order"]]
 # Payment methods
 transaction_table <- tables[["transaction"]]
 payment_plot <- ggplot(transaction_table, aes(x = payment_method))+
-  geom_bar(binwidth = 1) +
+  geom_bar(fill = 'indianred3') +
   labs(x = "Payment Method", y = "Count")
 
 # Save the plot
@@ -78,21 +77,10 @@ ggsave("bestsellers.jpeg", plot = bests, width = 10, height = 6, dpi = 300)
 ```{r}
 # Which category is the most popular
 
-install.packages("tidyr")
-library(tidyr)
-install.packages("ggplot2")
-library(ggplot2)
-install.packages("tidyverse")
-library(tidyverse)
-
-# Load required libraries
-library(tidyverse)
-
 category_table <- tables[["category"]]
 product_table <- tables[["product"]]
 customer_table <- tables[["customer"]]
 joint_in_table <- tables[["joint_in"]]
-product_table
 
 # Step 1: Join the product and category tables using the joint table
 product_category_join <- joint_in_table%>%
@@ -110,11 +98,30 @@ most_popular_category <- category_counts$category_name[1]
 print(paste("The most popular category is:", most_popular_category))
 
 
-ggplot(category_counts, aes(x = reorder(category_name, -count), y = count)) +
+top_cat <- ggplot(category_counts, aes(x = reorder(category_name, -count), y = count)) +
   geom_bar(stat = "identity", fill = "skyblue") +
   labs(x = "Category", y = "Number of Products", title = "Popularity of Categories") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   coord_flip()
+
+# Save the plot
+ggsave("top_category.jpeg", plot = top_cat, width = 10, height = 6, dpi = 300)
+```
+
+```{r}
+# Final Price of Orders Distribution
+tot_price <- 'SELECT final_price, order_detail_id FROM final_price_of_order'
+view_tot <- dbGetQuery(schema_db, tot_price)
+view_tot <- as_tibble(view_tot)
+
+transaction_table <- tables[["transaction"]]
+transaction_table <- left_join(transaction_table, view_tot, by = 'order_detail_id')
+basket <- ggplot(transaction_table, aes(final_price, fill = payment_method)) +
+  geom_histogram(binwidth = 2000) +
+  labs(title = 'Distribution of Orders based on Payment Method', x = 'Price', y = 'Frequency') 
+
+# Save the plot
+ggsave("basket_price.jpeg", plot = basket, width = 10, height = 6, dpi = 300)
 ```
 
 ```{r}
