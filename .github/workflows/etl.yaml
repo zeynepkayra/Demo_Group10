@@ -33,7 +33,7 @@ jobs:
       - name: Execute R script to load update the database with new entry (second data phase)
         run: |
           Rscript R/Second_Phase_Data_Load.R
-      - name: Execute R script to validate email, mobile number, and postcode
+      - name: Execute R script to validate email, mobile number, and postcode (This is a second check after data load to make their format proper)
         run: |
           Rscript R/Github_Action.R
       - name: Add collaborator 1
