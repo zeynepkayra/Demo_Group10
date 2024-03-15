@@ -126,8 +126,8 @@ CREATE TABLE joint_order (
   customer_id INTEGER,
   product_id INTEGER,
   quantity INTEGER,
-  FOREIGN KEY (order_detail_id) REFERENCES order_detail(order_detail_id)
-  FOREIGN KEY (customer_id) REFERENCES customer(customer_id)
+  FOREIGN KEY (order_detail_id) REFERENCES order_detail(order_detail_id),
+  FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
   FOREIGN KEY (product_id) REFERENCES product(product_id)
 );
 '
