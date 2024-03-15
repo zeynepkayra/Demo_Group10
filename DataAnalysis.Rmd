@@ -37,9 +37,13 @@ joint_order_table <- tables[["joint_order"]]
 ```{r}
 # Payment methods
 transaction_table <- tables[["transaction"]]
-ggplot(transaction_table, aes(x = payment_method)) +
+payment_plot <- ggplot(transaction_table, aes(x = payment_method))+
   geom_bar(binwidth = 1) +
   labs(x = "Payment Method", y = "Count")
+
+# Save the plot
+ggsave("payment.jpeg", plot = payment_plot, width = 10, height = 6, dpi = 300)
+
 ```
 
 ```{r}
@@ -60,11 +64,15 @@ best_sellers <- bsec %>%
   slice(1) %>% 
   ungroup()
 
-ggplot(best_sellers) +
+bests <- ggplot(best_sellers) +
   geom_bar(aes(x = product_name, y = total_quantity, fill = category_name), 
            stat = "identity") + 
   labs(x = "Products", y = "Quantity") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Save the plot
+ggsave("bestsellers.jpeg", plot = bests, width = 10, height = 6, dpi = 300)
+
 ```
 
 ```{r}
