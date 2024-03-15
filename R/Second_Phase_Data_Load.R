@@ -18,10 +18,8 @@ schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
 
 # 1.Customers Table
 
-set.seed(1000)
-
 # ID
-numbers_colon <- sample(110000:210000, 100, replace = FALSE)
+numbers_colon <- sample(110000:210000, 5, replace = FALSE)
 
 customer <- as_tibble(numbers_colon)
 names(customer)[names(customer) == "value"] <- "customer_id"
@@ -29,8 +27,8 @@ names(customer)[names(customer) == "value"] <- "customer_id"
 # Name
 person_provider <- PersonProvider$new()
 
-random_first_names <- replicate(100, person_provider$first_name(), )
-random_last_names <- replicate(100, person_provider$last_name(), )
+random_first_names <- replicate(5, person_provider$first_name(), )
+random_last_names <- replicate(5, person_provider$last_name(), )
 random_full_names <- paste(random_first_names, random_last_names)
 
 customer$name <- random_full_names
@@ -43,28 +41,28 @@ customer <- customer %>% select(-name_modified)
 # 1000 fake phone numbers
 lower_limit <- 4400000000000
 upper_limit <- 4499999999999
-fake_mobile_numbers <- runif(100, min = 0, max = 1) * (upper_limit - lower_limit) + lower_limit
+fake_mobile_numbers <- runif(5, min = 0, max = 1) * (upper_limit - lower_limit) + lower_limit
 
 customer$mobile_no <- paste("+", as.character(round(fake_mobile_numbers)), sep = "")
 
 # Credit Card Number
-customer$credit_card_no <- ch_credit_card_number(n = 100)
+customer$credit_card_no <- ch_credit_card_number(n = 5)
 
 # Country
 customer$country <- "UK"
 
 # Street Names
 street_elements <- c("Maple", "Main", "Oak", "Elm", "Cedar", "High", "Park", "Station", "Green", "Hill", 'Oxford', 'Liverpool', 'Westwood', 'Scarman', 'Gibbet Hill', 'Stoneleigh', 'Earlsdon', 'Lynchgate', 'Centenary', 'New', 'Moore', 'Abberton', 'Davenport', 'Cryfield', 'Lillington', 'Starley', 'Renown', 'Lakewood', 'Glasgow', 'Warwick', 'Stratford', 'Leighton', 'Chelsea')
-fake_street_names <- paste(sample(street_elements, 100, replace = TRUE))
+fake_street_names <- paste(sample(street_elements, 5, replace = TRUE))
 
 customer$street_name <- fake_street_names
 
 # House Number
-house_no <- sample(1:75, 100, replace = TRUE)
+house_no <- sample(1:75, 5, replace = TRUE)
 customer$house_no <- house_no
 
 # UK-style postcodes
-fake_postcodes <- paste0(sample(LETTERS, 100, replace = TRUE), sample(LETTERS, 100, replace = TRUE), sample(0:9, 100, replace = TRUE), " ", sample(0:9, 100, replace = TRUE), sample(LETTERS, 100, replace = TRUE), sample(LETTERS, 100, replace = TRUE))
+fake_postcodes <- paste0(sample(LETTERS, 5, replace = TRUE), sample(LETTERS, 5, replace = TRUE), sample(0:9, 5, replace = TRUE), " ", sample(0:9, 5, replace = TRUE), sample(LETTERS, 5, replace = TRUE), sample(LETTERS, 5, replace = TRUE))
 customer$postcode <- fake_postcodes
 
 # Adjust the columns to fit database
@@ -83,26 +81,24 @@ product_idd <- as_tibble(product_idd)
 
 # 7.Transactions Table
 
-set.seed(1001)
 
 # ID
-transaction_id <- sample(610001:710000, 500, replace = FALSE)
+transaction_id <- sample(610001:710000, 10, replace = FALSE)
 transaction <- as_tibble(transaction_id)
 names(transaction)[names(transaction) == "value"] <- 'transaction_id'
 
 # Payment Method
 method <- c('Credit Card', 'Transfer', 'Pay at Door', 'PayPal', 'Debit Card', 'Voucher')
-types <- paste(sample(method, 500, replace = TRUE))
+types <- paste(sample(method, 10, replace = TRUE))
 transaction$payment_method <- types
 
 # ------------------
 
 # 6.Order Details Table
 
-set.seed(1002)
 
 # ID
-order_details_id <- sample(510001:610000, 500, replace = FALSE)
+order_details_id <- sample(510001:610000, 10, replace = FALSE)
 order_detail <- as_tibble(order_details_id)
 names(order_detail)[names(order_detail) == "value"] <- 'order_detail_id'
 
@@ -111,20 +107,20 @@ start_date <- as.Date("2024-03-20")
 end_date <- as.Date("2024-08-20") 
 date_sequence <- seq.Date(start_date, end_date, by = "1 day")
 
-dates <- sample(date_sequence, 500, replace = TRUE)
+dates <- sample(date_sequence, 10, replace = TRUE)
 order_detail$delivery_date <- as.character(dates)
 
 # Discount
 lower_percentage <- seq(from = 5, to = 45, by = 5)
-lower_percentages <- sample(lower_percentage, 350, replace = TRUE)
+lower_percentages <- sample(lower_percentage, 7, replace = TRUE)
 upper_percentage <- seq(from = 50, to = 75, by = 5)
-upper_percentages <- sample(upper_percentage, 150, replace = TRUE)
+upper_percentages <- sample(upper_percentage, 3, replace = TRUE)
 percentages <- c(lower_percentages, upper_percentages)
 order_detail$discount <- paste(percentages, '%', sep = '')
 
 # order_detail_id
 orderid_list <- c(order_detail$order_detail_id)
-transaction$order_detail_id <- sample(orderid_list, 500, replace = FALSE)
+transaction$order_detail_id <- sample(orderid_list, 10, replace = FALSE)
 
 # transaction_id added as a foreign key
 
@@ -195,7 +191,7 @@ my_function <- function(n) {
   
   return(as_tibble(x_t))
 }
-new_orders <- my_function(500)
+new_orders <- my_function(10)
 
 # Rename the columns of joint_order table
 joint_order <- distinct(new_orders, order_detail_id, customer_id, product_id, .keep_all = TRUE)
