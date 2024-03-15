@@ -132,8 +132,8 @@ order_detail <- merge(x = order_detail, y = transaction, by = 'order_detail_id')
 
 # ------------------
 
-order_detail <- order_detail[, c(1, 2, 3, 4)]
-transaction <- transaction[, c(1, 2, 3)]
+order_detail <- order_detail[, c(1, 4, 2, 3)]
+transaction <- transaction[, c(1, 3, 2)]
 
 # # Data Integrity and Quality Check
 
@@ -194,14 +194,10 @@ my_function <- function(n) {
   
   return(as_tibble(x_t))
 }
+new_orders <- my_function(500)
 
-# Create 1000 rows
-result <- my_function(500)
-
-
-# Data Validation for joint_order table
-
-joint_order <- distinct(result, order_detail_id, customer_id, product_id, .keep_all = TRUE)
+# Rename the columns of joint_order table
+joint_order <- distinct(new_orders, order_detail_id, customer_id, product_id, .keep_all = TRUE)
 names(joint_order)[names(joint_order) == "order_detail$order_detail_id"] <- 'order_detail_id'
 names(joint_order)[names(joint_order) == "customer$customer_id"] <- 'customer_id'
 names(joint_order)[names(joint_order) == "product$product_id"] <- 'product_id'
@@ -213,9 +209,9 @@ names(joint_order)[names(joint_order) == "product$product_id"] <- 'product_id'
 
 
 my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
-dbWriteTable(my_db, "transaction", transaction, append= TRUE)
-dbWriteTable(my_db, "order_detail", order_detail, append= TRUE)
-dbWriteTable(my_db, "customer", customer, append= TRUE)
+dbWriteTable(my_db, "transaction", unique_trans, append= TRUE)
+dbWriteTable(my_db, "order_detail", unique_order, append= TRUE)
+dbWriteTable(my_db, "customer", unique_customer_fin, append= TRUE)
 
 # Joint tables
 dbWriteTable(my_db, "joint_order", joint_order, append= TRUE)
@@ -229,10 +225,9 @@ CREATE VIEW IF NOT EXISTS final_price_of_order AS select order_detail_id, subtot
 (select J.order_detail_id, J.product_id, P.price, J.quantity, (P.price* J.quantity) as total_price_for_each_product from joint_order J join product p where J.product_id = P.product_id) A 
 join order_detail O on A.order_detail_id = O.order_detail_id group by A.order_detail_id);
 '
-
 dbExecute(schema_db, create_price_view)
 
-# Exhibit the view and calculated field(Total Price of Order)
+# Exhibit the view and calculated field (Total Price of Order)
 view_query <- 'SELECT * FROM final_price_of_order'
 view_result <- dbGetQuery(schema_db, view_query)
 

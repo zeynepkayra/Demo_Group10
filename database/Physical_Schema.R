@@ -32,12 +32,12 @@ dbExecute(schema_db, create_supplier)
 create_product <- '
 CREATE TABLE product (
   product_id INTEGER NOT NULL,
+  supplier_id INTEGER NOT NULL,
   product_name VARCHAR(200),
   brand VARCHAR(150),
   price DOUBLE,
   rating DOUBLE,
   availability BOOLEAN,
-  supplier_id INTEGER NOT NULL,
   PRIMARY KEY (product_id),
   FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id)
 );
@@ -67,9 +67,9 @@ dbExecute(schema_db, create_customer)
 create_ad <- '
 CREATE TABLE ad (
   ad_id INTEGER NOT NULL,
+  product_id INTEGER,
   duration INTEGER,
   cost DOUBLE,
-  product_id INTEGER,
   PRIMARY KEY (ad_id),
   FOREIGN KEY (product_id) REFERENCES product(product_id)
 );
@@ -103,8 +103,8 @@ dbExecute(schema_db, create_joint_in)
 create_transaction <- '
 CREATE TABLE "transaction" (
   transaction_id INTEGER NOT NULL,
-  payment_method VARCHAR(30),
   order_detail_id INTEGER,
+  payment_method VARCHAR(30),
   PRIMARY KEY (transaction_id),
   FOREIGN KEY (order_detail_id) REFERENCES order_detail(order_detail_id)
 );
@@ -116,9 +116,9 @@ dbExecute(schema_db, create_transaction)
 create_order_detail <- '
 CREATE TABLE order_detail (
   order_detail_id INTEGER NOT NULL,
+  transaction_id INTEGER NOT NULL,
   delivery_date DATE,
   discount DOUBLE,
-  transaction_id INTEGER NOT NULL,
   PRIMARY KEY (order_detail_id),
   FOREIGN KEY (transaction_id) REFERENCES "transaction"(transaction_id)
 );

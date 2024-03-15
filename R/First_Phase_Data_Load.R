@@ -38,7 +38,7 @@ customer <- customer %>%
   separate(name, into = c("First_Name", "Last_Name"), sep = " ")
 customer <- customer %>% select(-name_modified)
 
-# 1000 fake phone numbers
+# Fake phone numbers
 lower_limit <- 4400000000000
 upper_limit <- 4499999999999
 fake_mobile_numbers <- runif(1000, min = 0, max = 1) * (upper_limit - lower_limit) + lower_limit
@@ -118,11 +118,12 @@ set.seed(6)
 
 product<- fake_products(1000)
 category_column <- c(product$category)
-product <- product %>% select(-color, -body_location, -sent_from, -category)
+product <- product %>% select(-color, -body_location, -sent_from)
 names(product)[names(product) == "name"] <- "product_name"
 names(product)[names(product) == "price"] <- "price"
 names(product)[names(product) == "id"] <- "product_id"
 names(product)[names(product) == "brand"] <- "brand"
+names(product)[names(product) == "category"] <- "category_name"
 
 # Brand
 split_brand <- function(x) {
@@ -150,12 +151,9 @@ product$availability <- availability
 supplierid_list <- c(Suppliers$Supplier_ID)
 product$supplier_id <- sample(supplierid_list, 1000, replace = TRUE)
 
-# Adjust the columns to fit database
-product <- product[, c(3, 1, 4, 2, 5, 6, 7)]
-
 # ------------------
 
-# 4.Ads Table
+# 4.Ad Table
 
 set.seed(7)
 
@@ -165,6 +163,10 @@ ad_id <- sample(310001:410000, 1000, replace = FALSE)
 ad <- as_tibble(ad_id)
 names(ad)[names(ad) == "value"] <- "ad_id"
 
+# product_id
+productid_list <- c(product$product_id)
+ad$product_id <- sample(productid_list, 1000, replace = FALSE)
+
 # Duration
 duration <- runif(1000, min = 0, max = 1) * 2
 ad$duration <- round(duration,2)
@@ -172,10 +174,6 @@ ad$duration <- round(duration,2)
 # Cost
 cost <- runif(1000, min = 0, max = 1) * 50
 ad$cost <- round(cost,2)
-
-# product_id
-productid_list <- c(product$product_id)
-ad$product_id <- sample(productid_list, 1000, replace = FALSE)
 
 # ------------------
 
@@ -240,7 +238,6 @@ orderid_list <- c(order_detail$order_detail_id)
 transaction$order_detail_id <- sample(orderid_list, 1500, replace = FALSE)
 
 # transaction_id added as a foreign key
-
 order_detail <- merge(x = order_detail, y = transaction, by = 'order_detail_id') %>% select(-payment_method)
 
 # ------------------
@@ -248,15 +245,12 @@ order_detail <- merge(x = order_detail, y = transaction, by = 'order_detail_id')
 # Joint table for relation 'In' including category_id and product_id as foreign keys
 set.seed(647823)
 
-cat_id <- c(category$category_id)
-categories <- sample(cat_id, 1000, replace = TRUE)
-prod_id <- c(product$product_id)
-joint_in <- tibble(prod_id, categories)
-names(joint_in)[names(joint_in) == "prod_id"] <- 'product_id'
-names(joint_in)[names(joint_in) == "categories"] <- 'category_id'
+joint_in <- left_join(product, category, by = 'category_name')
+joint_in <- joint_in %>% select(product_id, category_id)
+
+product <- product %>% select(-category_name)
 
 # Joint table for relation 'Order' including order_detail_id, customer_id, and product_id
-
 set.seed(2435345)
 my_function <- function(n) {
   x_t <- data.frame(order_detail_id = integer(),
@@ -296,8 +290,10 @@ names(joint_order)[names(joint_order) == "product$product_id"] <- 'product_id'
 
 # ------------------
 
-order_detail <- order_detail[, c(1, 2, 3, 4)]
-transaction <- transaction[, c(1, 2, 3)]
+# Adjust the columns to fit database
+order_detail <- order_detail[, c(1, 4, 2, 3)]
+transaction <- transaction[, c(1, 3, 2)]
+product <- product[, c(3, 7, 1, 4, 2, 5, 6)]
 
 # # Data Integrity and Quality Check
 
