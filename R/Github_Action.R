@@ -35,30 +35,4 @@ customer <- customer %>%
 dbDisconnect(my_db)
 
 
-# 2.	Updating the database with new data
-
-library(DBI)
-library(RSQLite)
-
-# Connect to database
-my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
-
-
-# Update product information
-update_product_info <- function(my_db, product_id, new_price, new_availability) {
-  dbExecute(my_db, "UPDATE product SET price = ?, availability = ? WHERE product_id = ?", 
-            params = list(new_price, new_availability, product_id))
-}
-update_product_info(my_db, '1', 110, 'True')
-
-
-# Update customer information
-update_customer_info <- function(my_db, customer_id, new_email, new_mobile_no) {
-  dbExecute(my_db, "UPDATE customer SET email = ? WHERE customer_id = ?", 
-            params = list(new_email, customer_id))
-}
-update_customer_info(my_db, '176122', 'Deanna_Parisian_H@mail.com')
-
-
-dbDisconnect(my_db)
 
