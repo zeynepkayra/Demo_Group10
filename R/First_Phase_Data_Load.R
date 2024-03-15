@@ -250,7 +250,7 @@ joint_in <- joint_in %>% select(product_id, category_id)
 
 product <- product %>% select(-category_name)
 
-# Joint table for relation 'Order' including order_detail_id, customer_id, and product_id
+# Joint table for relation 'Order' including order_detail_id, customer_id, product_id and quantity
 set.seed(2435345)
 my_function <- function(n) {
   x_t <- data.frame(order_detail_id = integer(),
@@ -281,7 +281,6 @@ my_function <- function(n) {
 
 result <- my_function(1500)
 
-# Data Validation for joint_order table
 # Remove any duplicate row/entry
 joint_order <- distinct(result, order_detail_id, customer_id, product_id, .keep_all = TRUE)
 names(joint_order)[names(joint_order) == "order_detail$order_detail_id"] <- 'order_detail_id'
@@ -290,7 +289,7 @@ names(joint_order)[names(joint_order) == "product$product_id"] <- 'product_id'
 
 # ------------------
 
-# Adjust the columns to fit database
+# Adjust the order of columns to fit database
 order_detail <- order_detail[, c(1, 4, 2, 3)]
 transaction <- transaction[, c(1, 3, 2)]
 product <- product[, c(3, 7, 1, 4, 2, 5, 6)]
@@ -329,11 +328,11 @@ if (length(duplicate_info) > 0) {
 }
 
 
-# Formatting Email column in Customers Table
+# Formatting Email column in Customers Table (some customers have ' in their names as default)
 customer$email <- gsub("'", "", customer$email)
 
 
-## Inserting fake data into database
+## Inserting fake data into database (first load)
 
 my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 dbWriteTable(my_db, "supplier", Suppliers, overwrite = TRUE)

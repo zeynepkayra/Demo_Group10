@@ -16,8 +16,9 @@ schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
 
 # Some of the remaining data is generated and then uploaded to the database after validation of data
 
-# 1.Customers Table
+# ------------------
 
+# New customers are joining to the database in the second phase (New customers are generated below)
 set.seed(1000)
 
 # ID
@@ -72,7 +73,7 @@ customer <- customer[, c(1, 4, 2, 3, 5, 6, 7, 8, 9, 10)]
 
 # ------------------
 
-# Extracting product_id using SQL query
+# Accessing existing product_id column in product table using SQL query
 create_product_id_query <- 'SELECT product_id FROM product;
 '
 dbExecute(schema_db, create_product_id_query)
@@ -81,7 +82,7 @@ product_idd <- as_tibble(product_idd)
 
 # ------------------
 
-# 7.Transactions Table
+# # New transactions are joining to the database in the second phase (New transactions are generated below due to arrival of new orders)
 
 set.seed(1001)
 
@@ -97,7 +98,7 @@ transaction$payment_method <- types
 
 # ------------------
 
-# 6.Order Details Table
+# New orders are joining to the database in the second phase (New orders are generated below due to existing customers and new customers)
 
 set.seed(1002)
 
@@ -132,6 +133,7 @@ order_detail <- merge(x = order_detail, y = transaction, by = 'order_detail_id')
 
 # ------------------
 
+# Adjust the order of columns to fit database
 order_detail <- order_detail[, c(1, 4, 2, 3)]
 transaction <- transaction[, c(1, 3, 2)]
 
@@ -140,8 +142,9 @@ transaction <- transaction[, c(1, 3, 2)]
 # Formatting Email column in Customers Table
 customer$email <- gsub("'", "", customer$email)
 
-# Before inserting, we need to make a check for duplicates by making comparison with the existing database table values
+# Before inserting, we need to make a check for duplicates by making comparison with the existing database table values. If customer_id, order_detail_id or transaction_id already exists, these duplicates will not be added to the table.
 
+# SQL queries are used to access the existing values in the database for customers, order details and transactions
 duplicate_check_customer <- 'SELECT customer_id, email, mobile_no from customer;'
 dbExecute(schema_db, duplicate_check_customer)
 customer_dup <- dbGetQuery(schema_db, duplicate_check_customer)
@@ -157,7 +160,7 @@ dbExecute(schema_db, duplicate_check_trans)
 trans_dup <- dbGetQuery(schema_db, duplicate_check_trans)
 trans_dup  <- as_tibble(trans_dup)
 
-# Remove any duplicate row/entry
+# Remove any duplicate row/entry if it already exists in the database
 unique_customer <- anti_join(customer, customer_dup, by = 'customer_id')
 unique_customer2 <- anti_join(unique_customer, customer_dup, by = 'email')
 unique_customer_fin <- anti_join(unique_customer2, customer_dup, by = 'mobile_no')
@@ -165,7 +168,7 @@ unique_order <- anti_join(order_detail, order_dup, by = 'order_detail_id')
 unique_trans <- anti_join(transaction, trans_dup, by = 'transaction_id')
 unique_trans <- semi_join(transaction, unique_order, by = 'transaction_id')
 
-# Joint table for relation 'Order' including order_detail_id, customer_id, and product_id
+# Then create a Joint table for relation 'Order' including order_detail_id, customer_id, and product_id and quantity to specify which order belongs to which customer and which products are purchased.
 
 set.seed(244773)
 my_function <- function(n) {
@@ -204,9 +207,7 @@ names(joint_order)[names(joint_order) == "product$product_id"] <- 'product_id'
 
 # ------------------
 
-
-## Inserting fake data into schema 
-
+## Inserting fake data into schema (second load - database update)
 
 my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 dbWriteTable(my_db, "transaction", unique_trans, append= TRUE)
