@@ -352,10 +352,15 @@ dbWriteTable(my_db, "joint_order", joint_order, overwrite= TRUE)
 # Calculation of Total Price of Orders after Discounts are applied
 
 create_price_view <- '
+
 CREATE VIEW IF NOT EXISTS final_price_of_order AS SELECT order_detail_id, subtotal, discount, subtotal*(1-discount*0.01) AS final_price FROM 
 (SELECT A.order_detail_id, COUNT(A.product_id) AS no_of_products, SUM(A.total_price_for_each_product) AS subtotal, O.discount FROM 
-(SELECT J.order_detail_id, J.product_id, P.price, J.quantity, (P.price* J.quantity) AS total_price_for_each_product FROM joint_order J JOIN product p WHERE J.product_id = P.product_id) A 
-JOIN order_detail O ON A.order_detail_id = O.order_detail_id GROUP BY A.order_detail_id);
+(SELECT J.order_detail_id, J.product_id, P.price, J.quantity, (P.price* J.quantity) AS total_price_for_each_product FROM joint_order J 
+JOIN 
+product p WHERE J.product_id = P.product_id) A 
+JOIN 
+order_detail O ON A.order_detail_id = O.order_detail_id GROUP BY A.order_detail_id);
+
 '
 
 dbExecute(schema_db, create_price_view)
