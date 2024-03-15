@@ -142,7 +142,7 @@ customer$email <- gsub("'", "", customer$email)
 
 # Before inserting, we need to make a check for duplicates by making comparison with the existing database table values
 
-duplicate_check_customer <- 'SELECT customer_id, email, mobile_no from customer;'
+duplicate_check_customer <- 'SELECT customer_id, email, mobile_no, credit_card_no from customer;'
 dbExecute(schema_db, duplicate_check_customer)
 customer_dup <- dbGetQuery(schema_db, duplicate_check_customer)
 customer_dup  <- as_tibble(customer_dup)
@@ -160,7 +160,8 @@ trans_dup  <- as_tibble(trans_dup)
 # Remove any duplicate row/entry
 unique_customer <- anti_join(customer, customer_dup, by = 'customer_id')
 unique_customer2 <- anti_join(unique_customer, customer_dup, by = 'email')
-unique_customer_fin <- anti_join(unique_customer2, customer_dup, by = 'mobile_no')
+unique_customer3 <- anti_join(unique_customer2, customer_dup, by = 'credit_card_no')
+unique_customer_fin <- anti_join(unique_customer3, customer_dup, by = 'mobile_no')
 unique_order <- anti_join(order_detail, order_dup, by = 'order_detail_id')
 unique_trans <- anti_join(transaction, trans_dup, by = 'transaction_id')
 unique_trans <- semi_join(transaction, unique_order, by = 'transaction_id')
