@@ -37,6 +37,26 @@ jobs:
         run: |
           git config --global user.email "kiranlyy@gmail.com"
           git config --global user.name "lyy"
+      - name: Add files
+        run: |
+          git config --global user.email "zeynepkayraozcakar@gmail.com"
+          git config --global user.name "zeynepkayra"
+      - name: Add files
+        run: |
+          git config --global user.email "selina71812@gmail.com"
+          git config --global user.name "selina"
+      - name: Add files
+        run: |
+          git config --global user.email "Sspmalik99@gmail.com"
+          git config --global user.name "pranay"
+      - name: Add files
+        run: |
+          git config --global user.email "tirthpatel8217@gmail.com"
+          git config --global user.name "tirth"
+      - name: Add files
+        run: |
+          git config --global user.email "afafct1234@gmail.com"
+          git config --global user.name "afaf"
       - name: Add modified files
         run: |
           git add .
