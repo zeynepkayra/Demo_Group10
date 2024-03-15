@@ -113,4 +113,3 @@ ggplot(category_counts, aes(x = reorder(category_name, -count), y = count)) +
 ```{r}
 # which product has the highest rating in each category
 ```
-
