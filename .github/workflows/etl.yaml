@@ -27,6 +27,9 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           Rscript -e 'install.packages(c("ggplot2", "dplyr", "readr", "tidyr", "RSQLite", "fakir", "charlatan", "generator","DBI"))'
+      - name: Execute R script to load the database with first part of data (first phase)
+        run: |
+          Rscript R/First_Phase_Data_Load.R
       - name: Execute R script to update the database with new entry (second data phase)
         run: |
           Rscript R/Second_Phase_Data_Load.R
