@@ -109,7 +109,7 @@ ggsave("top_category.jpeg", plot = top_cat, width = 10, height = 6, dpi = 300)
 ```
 
 ```{r}
-# Final Price of Orders Distribution
+# Final price of orders distribution with respect to payment method
 tot_price <- 'SELECT final_price, order_detail_id FROM final_price_of_order'
 view_tot <- dbGetQuery(schema_db, tot_price)
 view_tot <- as_tibble(view_tot)
