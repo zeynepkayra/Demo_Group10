@@ -171,7 +171,6 @@ print(highest_rating_per_category)
 # Optionally, you can save the results to a CSV file
 write.csv(highest_rating_per_category, "highest_rating_per_category.csv", row.names = FALSE)
 
-data<-read.csv("highest_rating_per_category.csv")
 
 ```
 
