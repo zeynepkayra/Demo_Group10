@@ -97,6 +97,10 @@ category_counts <- product_category_join %>%
 most_popular_category <- category_counts$category_name[1]
 print(paste("The most popular category is:", most_popular_category))
 
+# Writing it into the csv file
+
+write.csv(most_popular_category ,"most_popular_category.csv", row.names = FALSE)
+
 
 top_cat <- ggplot(category_counts, aes(x = reorder(category_name, -count), y = count)) +
   geom_bar(stat = "identity", fill = "skyblue") +
@@ -127,8 +131,48 @@ ggsave("basket_price.jpeg", plot = basket, width = 10, height = 6, dpi = 300)
 ```{r}
 # Top 20 customers 
 
+# Join the joint_order table with the customer_table to include customer names
+customer_order_join <- inner_join(joint_order_table, customer_table, by = "customer_id")
+
+# Aggregate the data to count the number of orders per customer
+customer_order_counts <- customer_order_join %>%
+  group_by(customer_id, First_Name , Last_Name) %>%
+  summarise(order_count = n(), .groups = "drop") %>%
+  arrange(desc(order_count), First_Name , Last_Name)
+
+# Select the top 20 customers with the highest order counts
+top_20_customers <- head(customer_order_counts, 20)
+
+# Print or visualize the results
+print(top_20_customers)
+
+# Optionally, you can save the top 20 customers to a CSV file
+write.csv(top_20_customers, "top_20_customers.csv", row.names = FALSE)
+
+
+
 ```
 
 ```{r}
 # which product has the highest rating in each category
+
+# Join the product_table to include product names
+product_rating_join <- inner_join(product_table,product_category_join, by = "product_id", suffix = c("_product", "_joint"))
+
+# Group the data by category and find the product with the highest rating in each category
+highest_rating_per_category <- product_rating_join %>%
+  group_by(category_id) %>%
+  slice(which.max(rating_product)) %>%
+  arrange(category_id)
+
+# Print or visualize the results
+print(highest_rating_per_category)
+
+# Optionally, you can save the results to a CSV file
+write.csv(highest_rating_per_category, "highest_rating_per_category.csv", row.names = FALSE)
+
+data<-read.csv("highest_rating_per_category.csv")
+
 ```
+
+
