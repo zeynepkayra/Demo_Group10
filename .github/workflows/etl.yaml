@@ -51,14 +51,3 @@ jobs:
         run: |
           git config --global user.email "afafct1234@gmail.com"
           git config --global user.name "afaf"
-      - name: Add modified files
-        run: |
-          git add .
-      - name: Commit files
-        run: |
-          git commit -m "Add analysis results"
-      - name: Push changes
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-            github_token: ${{ secrets.GITHUB_TOKEN }}
-            branch: main
