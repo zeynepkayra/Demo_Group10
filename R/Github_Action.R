@@ -1,5 +1,6 @@
 library(DBI)
 library(dplyr)
+library(RSQLite)
 
 # 1.	Running data validation
 my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
@@ -32,7 +33,21 @@ customer <- customer %>%
          valid_phone = validate_phone(mobile_no),
          valid_postcode = validate_uk_postcode(postcode))
 
+
+# update database
+dbWriteTable(my_db, "customer", customer, overwrite = TRUE, row.names = FALSE)
+
+
+
+# calculate invalid data
+invalid_counts <- customer %>%
+  summarize(
+    invalid_emails = sum(!valid_email),
+    invalid_phones = sum(!valid_phone),
+    invalid_postcodes = sum(!valid_postcode)
+  )
+
+print(invalid_counts)
+
+
 dbDisconnect(my_db)
-
-
-
