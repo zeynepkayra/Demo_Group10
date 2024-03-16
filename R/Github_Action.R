@@ -174,19 +174,12 @@ validate_product_id <- function(product_id) {
 
 # duration
 validate_duration <- function(duration) {
-  if(!is.numeric(duration)) {
-    return(FALSE)
-  }
-  ifelse(duration >= 0 && floor(duration * 100) == (duration * 100), TRUE, FALSE)
+  is.numeric(duration)
 }
-
 
 # cost
 validate_cost <- function(cost) {
-  if(!is.numeric(cost)) {
-    return(FALSE)
-  }
-  ifelse(cost >= 0 && floor(cost * 100) == (cost * 100), TRUE, FALSE)
+  is.numeric(cost)
 }
 
 
