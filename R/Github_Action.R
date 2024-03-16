@@ -4,11 +4,12 @@ library(RSQLite)
 
 # Running data validation
 
-# 1. Customer Table
-
 # Connect to database
 my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 customer <- dbReadTable(my_db, "customer")
+
+
+# 1. Customer Table
 
 # Customer ID
 validate_customer_id <- function(customer_id) {
@@ -85,13 +86,9 @@ invalid_counts_customer <- data.frame(
 print(invalid_counts_customer)
 
 
-dbDisconnect(my_db)
 
 
 # 2. Supplier Table
-
-# Connect to database
-my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 supplier <- dbReadTable(my_db, "supplier")
 
 # Supplier ID
@@ -153,13 +150,11 @@ invalid_counts_supplier <- data.frame(
 
 print(invalid_counts_supplier)
 
-dbDisconnect(my_db)
+
 
 
 # 3. Ad Table
 
-# Connect to database
-my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 ad <- dbReadTable(my_db, "ad")
 
 # ad ID
@@ -193,12 +188,9 @@ invalid_counts_ad <- data.frame(
 
 print(invalid_counts_ad)
 
-dbDisconnect(my_db)
+
 
 # 4. Category Table
-
-# Connect to database
-my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 category <- dbReadTable(my_db, "category")
 
 # Category ID
@@ -219,13 +211,10 @@ invalid_counts_category <- data.frame(
 
 print(invalid_counts_category)
 
-dbDisconnect(my_db)
+
 
 
 # 5. Transaction Table
-
-# Connect to database
-my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 transaction <- dbReadTable(my_db, "transaction")
 
 # Transaction ID
@@ -252,14 +241,9 @@ invalid_counts_transaction <- data.frame(
 
 print(invalid_counts_transaction)
 
-dbDisconnect(my_db)
-
 
 
 # 6. Order Details Table
-
-# Connect to database
-my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 order_detail <- dbReadTable(my_db, "order_detail")
 
 # Order detail ID
