@@ -143,7 +143,7 @@ ratingg <- pmin(ratingg, 5)
 product$rating <- round(ratingg, 1)
 
 # Availability
-availability <- c("True", "False")
+availability <- c("Yes", "No")
 availability <- paste(sample(availability, 1000, replace = TRUE))
 product$availability <- availability
 
