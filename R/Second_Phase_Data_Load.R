@@ -162,6 +162,19 @@ unique_order <- anti_join(order_detail, order_dup, by = 'order_detail_id')
 unique_trans <- anti_join(transaction, trans_dup, by = 'transaction_id')
 unique_trans <- semi_join(transaction, unique_order, by = 'transaction_id')
 
+# Keeping record of invalid entries if any
+invalid_orders <- anti_join(order_detail, unique_order, by = 'order_detail_id')
+invalid_transactions <- anti_join(transaction, unique_trans, by = 'transaction_id')
+invalid_customers <- anti_join(customer, unique_customer_fin, by = 'customer_id')
+
+ord <- paste0('The number of invalid order entries ', nrow(invalid_orders))
+tra <- paste0('The number of invalid transaction entries are ', nrow(invalid_transactions))
+cus <- paste0('The number of invalid customer entries are ', nrow(invalid_customers))
+
+all_messages <- c(ord, tra, cus)
+write.table(all_messages, "Invalid_Entries.txt", sep = "\n", row.names = FALSE, col.names = FALSE)
+
+
 # Joint table for relation 'Order' including order_detail_id, customer_id, and product_id
 
 my_function <- function(n) {
