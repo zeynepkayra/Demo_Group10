@@ -1,3 +1,11 @@
+#
+# This is the user-interface definition of a Shiny web application. You can
+# run the application by clicking 'Run App' above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
 
 library(shiny)
 library(shinydashboard)
@@ -8,6 +16,14 @@ library(plotly)
 
 ui <- dashboardPage(
     dashboardHeader(title="IB9HP0 Dashboard Demo"), 
+    dashboardSidebar(  
+    
+        sidebarMenu(
+            menuItem("Data", tabName = "diamondsdata", icon = icon("dashboard")),
+            menuItem("Plots", tabName = "diamondsplots", icon = icon("th")),
+            menuItem("Controls", tabName = "diamondplotswithcontrols", icon = icon("filter"))
+    
+    )), 
     dashboardBody(    
         tabItems(
             # First tab content
