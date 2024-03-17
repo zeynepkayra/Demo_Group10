@@ -1,12 +1,3 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
 library(shiny)
 library(shinydashboard)
 library(DT)
@@ -14,58 +5,73 @@ library(ggplot2)
 library(plotly)
 
 
-ui <- dashboardPage(
-    dashboardHeader(title="IB9HP0 Dashboard Demo"), 
-    dashboardSidebar(  
-    
-        sidebarMenu(
-            menuItem("Data", tabName = "diamondsdata", icon = icon("dashboard")),
-            menuItem("Plots", tabName = "diamondsplots", icon = icon("th")),
-            menuItem("Controls", tabName = "diamondplotswithcontrols", icon = icon("filter"))
-    
-    )), 
-    dashboardBody(    
-        tabItems(
-            # First tab content
-            tabItem(tabName = "diamondsdata",
-                    fluidRow( h1("Dataset") ), 
-                    fluidRow(
-                        column(width = 12,
-                            DT::dataTableOutput("diamondsdatatable")
+ui <- dashboardPage(skin = "black",
+                    
+                    # Dashboard Title
+                    header = dashboardHeader(title = "Dashboard"),
+                    
+                    # Sidebar
+                    sidebar = dashboardSidebar(
+                      sidebarMenu(
+                        menuItem(" Home", tabName = "home", icon = icon("home")),
+                        menuItem(" Data", tabName = "data", icon = icon("list"))
+                      )
+                    ),
+                    
+                    # Body of the dashboard 
+                    body = dashboardBody(
+                      tabItems(
+                        
+                        tabItem(tabName = "home", 
+                                fluidRow(
+                                  box(title = "Total Rows", status = "primary"),
+                                  box(title = "Total Columns", status = "primary")
+                                ),
+                                fluidRow(column(width = 6, 
+                                                selectInput("dataTable", label = h3("Select Table"), 
+                                                            choices = c("Category Table", "Product Table","Ads Table",
+                                                                        "Customer Table", "Order Detail Table",
+                                                                        "Supplier Table", "Transaction Table"), 
+                                                            selected = "category_table")
+                                )), 
+                                fluidRow(column(width = 12, 
+                                                DT::dataTableOutput("dataTables")))
+                        ),
+                        
+                        tabItem(tabName = "data", 
+                                fluidRow(
+                                  column(h1("Data Page"), width =12),
+                                ),
+                                fluidRow(
+                                  column(
+                                    width = 12, 
+                                    DT::dataTableOutput("demo_data")
+                                  )
+                                )
                         )
+                      )
+                      
+                      
+                      
                     )
                     
-            ),
-            
-            # Second tab content
-            tabItem(tabName = "diamondsplots",
-                    fluidRow(column(width=12, h1("Plots"))), 
-                    fluidRow(
-                        column(width = 6, 
-                                    box(title="Price Histogram",
-                                        width=12,
-                                        plotOutput("pricehist"))),
-                        column(width = 6, 
-                                    box(title="Price Histogram Plotly", 
-                                        width = 12,
-                                        plotlyOutput("pricehistplotly")))
-                        
-                        )
-            ), 
-            tabItem(tabName = "diamondplotswithcontrols", 
-                    fluidRow(column(width = 12, h1("Plots with controls"))), 
-                    fluidRow(column(width = 6, 
-                             selectInput("diamondcut", label = h3("Select Cut"), 
-                                         choices = list("Fair" = "Fair", "Good"="Good", 
-                                                        "Very Good"="Very Good", 
-                                                        "Premium"="Premium", 
-                                                        "Ideal"="Ideal" 
-                                                        ), 
-                                         selected = "Ideal")
-                             )), 
-                    fluidRow(column(width = 12, 
-                                    plotlyOutput("pricehistplotlywithfilter")))
-            )
-        )
-    )
+                    
+                    
 )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
