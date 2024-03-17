@@ -11,18 +11,21 @@ my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 
 customer <- dbReadTable(my_db, "customer")
 
-# Customer ID
+
+# 1. Customer Table
+
+# Customer ID (6-digit)
 validate_customer_id <- function(customer_id) {
   ifelse(grepl("^\\d{6}$", customer_id), TRUE, FALSE)
 }
 
-# Email format 
+# Email format (xxx@xxx.xxx)
 validate_email <- function(email) {
   email_pattern <- "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
   ifelse(grepl(email_pattern, email), TRUE, FALSE)
 }
 
-# Mobile number format
+# Mobile number format (+xxxxxxxxxxxxxx)
 validate_phone <- function(phone) {
   phone_pattern <- "^\\+?[1-9]\\d{1,14}$"
   ifelse(grepl(phone_pattern, phone), TRUE, FALSE)
@@ -55,10 +58,10 @@ validate_credit_card_no <- function(credit_card_no) {
 
 # Street name (without number)
 validate_street_name <- function(street_name) {
-  ifelse(grepl("^[A-Za-z0-9]+([ '-][A-Za-z0-9]+)*$", street_name), TRUE, FALSE)
+  ifelse(grepl("^[A-Za-z]+([ '-][A-Za-z]+)*$", street_name), TRUE, FALSE)
 }
 
-# House No
+# House No (number+letter)
 validate_house_no <- function(house_no) {
   ifelse(grepl("^\\d+[A-Za-z]?$", house_no), TRUE, FALSE)
 }
@@ -87,26 +90,32 @@ print(invalid_counts_customer)
 
 # duplicates 
 
+
 customer_duplicates <- dbGetQuery(my_db, "SELECT customer_id, count(*) from customer group by customer_id having count(*) > 1")
  print(paste("No:of duplicates for customer table is ",nrow(customer_duplicates)))
+
+
+
 
 # 2. Supplier Table
 
 supplier <- dbReadTable(my_db, "supplier")
 
-# Supplier ID
+# Supplier ID (6-digit)
 validate_supplier_id <- function(Supplier_ID) {
   ifelse(grepl("^\\d{6}$", Supplier_ID), TRUE, FALSE)
 }
 
-# Supplier Name
+# Supplier Name (only letters)
 validate_supplier_name <- function(Supplier_Name) {
-  name_pattern <- "^[A-Za-z0-9]+([ '.-][A-Za-z0-9]+)*$"
+  name_pattern <- "^[A-Za-z]+([ '.-][A-Za-z]+)*\\.?$"  
   ifelse(grepl(name_pattern, Supplier_Name), TRUE, FALSE)
 }
 
 
-# Rating
+
+# Rating (0.0-5.0)
+
 validate_rating <- function(Rating) {
   if(!is.numeric(Rating)) {
     return(rep(FALSE, length(Rating)))  
@@ -125,10 +134,10 @@ validate_country <- function(Country) {
 
 # Street Name
 validate_street_name <- function(Street_Name) {
-  ifelse(grepl("^[A-Za-z0-9]+([ '-][A-Za-z0-9]+)*$", Street_Name), TRUE, FALSE)
+  ifelse(grepl("^[A-Za-z]+([ '-][A-Za-z]+)*$", Street_Name), TRUE, FALSE)
 }
 
-# House No
+# House No (number+letter)
 validate_house_no <- function(House_No) {
   ifelse(grepl("^\\d+[A-Za-z]?$", House_No), TRUE, FALSE)
 }
@@ -164,12 +173,13 @@ print(paste("No:of duplicates for supplier table is ",nrow(supplier_duplicates))
 
 ad <- dbReadTable(my_db, "ad")
 
-# ad ID
+
+# ad ID (6-digit)
 validate_ad_id <- function(ad_id) {
   ifelse(grepl("^\\d{6}$", ad_id), TRUE, FALSE)  
 }
 
-# product ID
+# product ID (1-1000)
 validate_product_id <- function(product_id) {
   ifelse(product_id >= 1 & product_id <= 1000, TRUE, FALSE)
 }
@@ -191,6 +201,16 @@ validate_cost <- function(cost) {
   ifelse(cost >= 0 && cost <= 1000, TRUE, FALSE)
 }
 
+# duration (numeric)
+validate_duration <- function(duration) {
+  is.numeric(duration)
+}
+
+# cost (numeric)
+validate_cost <- function(cost) {
+  is.numeric(cost)
+}
+
 
 # calculate invalid data
 invalid_counts_ad <- data.frame(
@@ -202,22 +222,24 @@ invalid_counts_ad <- data.frame(
 
 print(invalid_counts_ad)
 
+
 # duplicates 
 
 ad_duplicates <- dbGetQuery(my_db, "SELECT ad_id, count(*) from ad group by ad_id having count(*) > 1")
 print(paste("No:of duplicates for ad table is ",nrow(ad_duplicates)))
 
 
+
 # 4. Category Table
 
 category <- dbReadTable(my_db, "category")
 
-# Category ID
+# Category ID (6-digit)
 validate_category_id <- function(category_id) {
   ifelse(grepl("^\\d{6}$", category_id), TRUE, FALSE)
 }
 
-# Category Name 
+# Category Name (only letters)
 validate_category_name <- function(category_name) {
   ifelse(grepl("^[A-Za-z ]+$", category_name), TRUE, FALSE)
 }
@@ -230,27 +252,29 @@ invalid_counts_category <- data.frame(
 
 print(invalid_counts_category)
 
+
 # duplicates 
 
 category_duplicates <- dbGetQuery(my_db, "SELECT category_id, count(*) from category group by category_id having count(*) > 1")
 print(paste("No:of duplicates for category table is ",nrow(category_duplicates)))
 
 
+
 # 5. Transaction Table
 
 transaction <- dbReadTable(my_db, "transaction")
 
-# Transaction ID
+# Transaction ID (6-digit)
 validate_transaction_id <- function(transaction_id) {
   ifelse(grepl("^\\d{6}$", transaction_id), TRUE, FALSE)
 }
 
-# Order detail ID
+# Order detail ID (6-digit)
 validate_order_detail_id <- function(order_detail_id) {
   ifelse(grepl("^\\d{6}$", order_detail_id), TRUE, FALSE)
 }
 
-# Payment method
+# Payment method (only letters)
 validate_payment_method <- function(payment_method) {
   ifelse(grepl("^[A-Za-z ]+$", payment_method), TRUE, FALSE)
 }
@@ -270,23 +294,24 @@ invalid_counts_transaction <- data.frame(
 
 print(invalid_counts_transaction)
 
+
 # duplicates 
 
 transaction_duplicates <- dbGetQuery(my_db, "SELECT transaction_id, count(*) from 'transaction' group by transaction_id having count(*) > 1")
 print(paste("No:of duplicates for transaction table is ",nrow(transaction_duplicates)))
 
 
-# 6. Order Details Table
 
+# 6. Order Details Table
 
 order_detail <- dbReadTable(my_db, "order_detail")
 
-# Order detail ID
+# Order detail ID (6-digit)
 validate_order_detail_id <- function(order_detail_id) {
   ifelse(grepl("^\\d{6}$", order_detail_id), TRUE, FALSE)
 }
 
-# transaction ID
+# transaction ID (6-digit)
 validate_transaction_id <- function(transaction_id) {
   ifelse(grepl("^\\d{6}$", transaction_id), TRUE, FALSE)
 }
@@ -297,7 +322,7 @@ validate_delivery_date <- function(delivery_date) {
            error = function(e) FALSE)
 }
 
-# discount
+# discount (xx%)
 validate_discount <- function(discount) {
   if(!is.numeric(discount)) {
     return(FALSE)
