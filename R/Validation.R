@@ -21,7 +21,7 @@ validate_customer_id <- function(customer_id) {
 
 # Email format (xxx@xxx.xxx)
 validate_email <- function(email) {
-  email_pattern <- "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+  email_pattern <- "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.com$"
   ifelse(grepl(email_pattern, email), TRUE, FALSE)
 }
 
