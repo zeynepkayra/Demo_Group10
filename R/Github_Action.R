@@ -4,10 +4,11 @@ library(RSQLite)
 
 # Running data validation
 
-# 1. Customer Table
-
 # Connect to database
 my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
+
+# 1. Customer Table
+
 customer <- dbReadTable(my_db, "customer")
 
 # Customer ID
@@ -84,14 +85,13 @@ invalid_counts_customer <- data.frame(
 
 print(invalid_counts_customer)
 
+# duplicates 
 
-dbDisconnect(my_db)
-
+customer_duplicates <- dbGetQuery(my_db, "SELECT customer_id, count(*) from customer group by customer_id having count(*) > 1")
+ print(paste("No:of duplicates for customer table is ",nrow(customer_duplicates)))
 
 # 2. Supplier Table
 
-# Connect to database
-my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 supplier <- dbReadTable(my_db, "supplier")
 
 # Supplier ID
@@ -104,6 +104,7 @@ validate_supplier_name <- function(Supplier_Name) {
   name_pattern <- "^[A-Za-z0-9]+([ '.-][A-Za-z0-9]+)*$"
   ifelse(grepl(name_pattern, Supplier_Name), TRUE, FALSE)
 }
+
 
 # Rating
 validate_rating <- function(Rating) {
@@ -153,13 +154,14 @@ invalid_counts_supplier <- data.frame(
 
 print(invalid_counts_supplier)
 
-dbDisconnect(my_db)
+# duplicates 
+
+supplier_duplicates <- dbGetQuery(my_db, "SELECT supplier_id, count(*) from supplier group by supplier_id having count(*) > 1")
+print(paste("No:of duplicates for supplier table is ",nrow(supplier_duplicates)))
 
 
 # 3. Ad Table
 
-# Connect to database
-my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 ad <- dbReadTable(my_db, "ad")
 
 # ad ID
@@ -172,21 +174,21 @@ validate_product_id <- function(product_id) {
   ifelse(product_id >= 1 & product_id <= 1000, TRUE, FALSE)
 }
 
-# duration
+# duration (ad duration can be 0 to 10 minutes)
 validate_duration <- function(duration) {
   if(!is.numeric(duration)) {
     return(FALSE)
   }
-  ifelse(duration >= 0 && floor(duration * 100) == (duration * 100), TRUE, FALSE)
+  ifelse(duration >= 0 && duration <= 10 && floor(duration * 100) == (duration * 100), TRUE, FALSE)
 }
 
 
-# cost
+# cost 
 validate_cost <- function(cost) {
   if(!is.numeric(cost)) {
     return(FALSE)
   }
-  ifelse(cost >= 0 && floor(cost * 100) == (cost * 100), TRUE, FALSE)
+  ifelse(cost >= 0 && cost <= 1000, TRUE, FALSE)
 }
 
 
@@ -200,12 +202,14 @@ invalid_counts_ad <- data.frame(
 
 print(invalid_counts_ad)
 
-dbDisconnect(my_db)
+# duplicates 
+
+ad_duplicates <- dbGetQuery(my_db, "SELECT ad_id, count(*) from ad group by ad_id having count(*) > 1")
+print(paste("No:of duplicates for ad table is ",nrow(ad_duplicates)))
+
 
 # 4. Category Table
 
-# Connect to database
-my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 category <- dbReadTable(my_db, "category")
 
 # Category ID
@@ -226,13 +230,14 @@ invalid_counts_category <- data.frame(
 
 print(invalid_counts_category)
 
-dbDisconnect(my_db)
+# duplicates 
+
+category_duplicates <- dbGetQuery(my_db, "SELECT category_id, count(*) from category group by category_id having count(*) > 1")
+print(paste("No:of duplicates for category table is ",nrow(category_duplicates)))
 
 
 # 5. Transaction Table
 
-# Connect to database
-my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 transaction <- dbReadTable(my_db, "transaction")
 
 # Transaction ID
@@ -250,6 +255,12 @@ validate_payment_method <- function(payment_method) {
   ifelse(grepl("^[A-Za-z ]+$", payment_method), TRUE, FALSE)
 }
 
+# checking payment methods other than listed and setting it to others
+pay_method  <- "
+  UPDATE 'transaction' SET payment_method = 'Others' where payment_method not in ('Transfer', 'PayPal','Credit Card','Debit Card','Pay at Door', 'Voucher');
+"
+dbExecute(my_db, pay_method)
+
 # calculate invalid data
 invalid_counts_transaction <- data.frame(
   invalid_transaction_ids = sum(!sapply(transaction$Transaction_ID, validate_transaction_id)),
@@ -259,14 +270,15 @@ invalid_counts_transaction <- data.frame(
 
 print(invalid_counts_transaction)
 
-dbDisconnect(my_db)
+# duplicates 
 
+transaction_duplicates <- dbGetQuery(my_db, "SELECT transaction_id, count(*) from 'transaction' group by transaction_id having count(*) > 1")
+print(paste("No:of duplicates for transaction table is ",nrow(transaction_duplicates)))
 
 
 # 6. Order Details Table
 
-# Connect to database
-my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
+
 order_detail <- dbReadTable(my_db, "order_detail")
 
 # Order detail ID
@@ -303,21 +315,114 @@ invalid_counts_order_detail <- data.frame(
 
 print(invalid_counts_order_detail)
 
+# duplicates 
 
-# update database
-dbWriteTable(my_db, "customer", customer, overwrite = TRUE, row.names = FALSE)
+order_detail_duplicates <- dbGetQuery(my_db, "SELECT order_detail_id, count(*) from order_detail group by order_detail_id having count(*) > 1")
+print(paste("No:of duplicates for order_detail table is ",nrow(order_detail_duplicates)))
 
 
+#7. Products table
+
+product <- dbReadTable(my_db, "product")
+
+# Validate price
+
+validate_price <- function(price){
+  ifelse(price <= 0, FALSE , TRUE )
+}
+
+validate_availability <-  function(availability) {
+  if (!(availability %in% c("yes", "no"))) {
+    return(TRUE)  
+  } else {
+    return(FALSE)
+  }
+}
+
+
+validate_rating_pr <- function(rating) {
+  if(!is.numeric(rating)) {
+    return(rep(FALSE, length(rating)))  
+  }
+  
+  result <- (rating >= 0.0 & rating <= 5.0) & (floor(rating * 10) == (rating * 10))
+  return(result)
+}
+
+validate_prname <- function(product_name){
+  if (is.null(product_name) | product_name == ""){
+    print("product name is null")
+    return (FALSE)
+  }
+  else {
+    return(TRUE)
+  }
+}
+
+validate_brand <- function(brand){
+  if(is.null(brand) | brand == ""){
+    print("product brand is null")
+    return(FALSE)
+  }
+  else {
+    return(TRUE)
+  }
+}
 
 # calculate invalid data
-invalid_counts <- customer %>%
-  summarize(
-    invalid_emails = sum(!valid_email),
-    invalid_phones = sum(!valid_phone),
-    invalid_postcodes = sum(!valid_postcode)
-  )
+invalid_counts_product <- data.frame(
+  invalid_price = sum(!sapply(product$price, validate_price)),
+  invalid_rating_pr = sum(!sapply(product$rating, validate_rating_pr)),
+  invalid_availability = sum(!sapply(product$availability, validate_availability)),
+  invalid_prname = sum(!sapply(product$product_name, validate_prname)),
+  invalid_brand = sum(!sapply(product$brand, validate_brand))
+)
 
-print(invalid_counts)
+print(invalid_counts_product)
+
+# duplicates 
+
+product_duplicates <- dbGetQuery(my_db, "SELECT product_id, count(*) from product group by product_id having count(*) > 1")
+print(paste("No:of duplicates for product table is ",nrow(product_duplicates)))
+
+#Referential Integrity
+
+# Product Table
+
+sup_id_query <- "UPDATE Product SET supplier_id = -1 WHERE supplier_id NOT IN (SELECT supplier_id FROM supplier);"
+dbExecute(my_db, sup_id_query)
+
+# Ad Table
+
+pr_id_query <- "UPDATE Ad SET product_id = -1 WHERE product_id NOT IN (SELECT product_id FROM product);"
+dbExecute(my_db, pr_id_query)
+
+# Transaction Table
+
+orderdet_id_query <- "UPDATE 'transaction' SET order_detail_id = -1 WHERE order_detail_id NOT IN (SELECT order_detail_id FROM order_detail);"
+dbExecute(my_db, orderdet_id_query)
+
+# Order Detail Table
+
+tr_id_query <- "UPDATE order_detail SET transaction_id = -1 WHERE transaction_id NOT IN (SELECT transaction_id FROM 'transaction');"
+dbExecute(my_db, tr_id_query)
+
+# Order Table
+
+or_id <- "UPDATE joint_order SET order_detail_id = -1 WHERE order_detail_id NOT IN (SELECT order_detail_id FROM order_detail);"
+dbExecute(my_db, or_id)
+cu_id <- "UPDATE joint_order SET customer_id = -1 WHERE customer_id NOT IN (SELECT customer_id FROM customer);"
+dbExecute(my_db, cu_id)
+pr_id <- "UPDATE joint_order SET product_id = -1 WHERE product_id NOT IN (SELECT product_id FROM product);"
+dbExecute(my_db, pr_id)
+
+# In table 
+
+pr_id_in <- "UPDATE joint_in SET product_id = -1 WHERE product_id NOT IN (SELECT product_id FROM product);"
+dbExecute(my_db, pr_id_in)
+cat_id_in <- "UPDATE joint_in SET category_id = -1 WHERE category_id NOT IN (SELECT category_id FROM category);"
+dbExecute(my_db, cat_id_in)
+
 
 
 dbDisconnect(my_db)
