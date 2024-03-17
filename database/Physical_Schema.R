@@ -20,8 +20,8 @@ schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
 create_supplier <- '
   CREATE TABLE IF NOT EXISTS "supplier" (
     "supplier_id" INTEGER PRIMARY KEY,
-    "supplier_name" VARCHAR(100),
-    "rating" DOUBLE,
+    "supplier_name" VARCHAR(100) NOT NULL,
+    "rating" DOUBLE DEFAULT 1,
     "country" VARCHAR(55),
     "street_name" VARCHAR(100),
     "house_no" INTEGER,
@@ -50,15 +50,15 @@ dbExecute(schema_db, create_product)
 create_customer <- '
 CREATE TABLE IF NOT EXISTS "customer" (
   "customer_id" INTEGER PRIMARY KEY,
-  "email" VARCHAR(150) UNIQUE,
-  "first_name" VARCHAR(150),
-  "last_name" VARCHAR(150),
-  "mobile_no" CHAR(15) UNIQUE,
-  "credit_card_no" CHAR(20) UNIQUE,
-  "country" VARCHAR(55),
-  "street_name" VARCHAR(100),
-  "house_no" INTEGER,
-  "postcode" VARCHAR(9)
+  "email" VARCHAR(150) UNIQUE NOT NULL,
+  "first_name" VARCHAR(150) NOT NULL,
+  "last_name" VARCHAR(150) NOT NULL,
+  "mobile_no" CHAR(15) UNIQUE NOT NULL,
+  "credit_card_no" CHAR(20) UNIQUE NOT NULL,
+  "country" VARCHAR(55) NOT NULL,
+  "street_name" VARCHAR(100) NOT NULL,
+  "house_no" INTEGER NOT NULL,
+  "postcode" VARCHAR(9) NOT NULL
 );
 '
 
@@ -69,8 +69,8 @@ create_ad <- '
 CREATE TABLE IF NOT EXISTS "ad" (
   "ad_id" INTEGER PRIMARY KEY,
   "product_id" INTEGER,
-  "duration" INTEGER,
-  "cost" DOUBLE,
+  "duration" INTEGER DEFAULT 1,
+  "cost" DOUBLE NOT NULL,
   FOREIGN KEY ("product_id") REFERENCES product("product_id")
 );
 '
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS "order_detail" (
   "order_detail_id" INTEGER PRIMARY KEY,
   "transaction_id" INTEGER NOT NULL,
   "delivery_date" DATE,
-  "discount" DOUBLE,
+  "discount" DOUBLE DEFAULT 0,
   FOREIGN KEY ("transaction_id") REFERENCES "transaction"("transaction_id")
 );
 '
