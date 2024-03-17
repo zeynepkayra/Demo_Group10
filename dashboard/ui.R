@@ -13,8 +13,8 @@ ui <- dashboardPage(skin = "black",
                     # Sidebar
                     sidebar = dashboardSidebar(
                       sidebarMenu(
-                        menuItem(" Home", tabName = "home", icon = icon("home")),
-                        menuItem(" Data", tabName = "data", icon = icon("list"))
+                        menuItem(" Data Table", tabName = "data", icon = icon("home"))
+                        #menuItem(" Data", tabName = "data", icon = icon("list"))
                       )
                     ),
                     
@@ -22,11 +22,7 @@ ui <- dashboardPage(skin = "black",
                     body = dashboardBody(
                       tabItems(
                         
-                        tabItem(tabName = "home", 
-                                fluidRow(
-                                  box(title = "Total Rows", status = "primary"),
-                                  box(title = "Total Columns", status = "primary")
-                                ),
+                        tabItem(tabName = "data", 
                                 fluidRow(column(width = 6, 
                                                 selectInput("dataTable", label = h3("Select Table"), 
                                                             choices = c("Category Table", "Product Table","Ads Table",
@@ -38,10 +34,7 @@ ui <- dashboardPage(skin = "black",
                                                 DT::dataTableOutput("dataTables")))
                         ),
                         
-                        tabItem(tabName = "data", 
-                                fluidRow(
-                                  column(h1("Data Page"), width =12),
-                                ),
+                        tabItem(tabName = "home", 
                                 fluidRow(
                                   column(
                                     width = 12, 
