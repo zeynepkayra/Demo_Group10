@@ -44,25 +44,19 @@ In an e-commerce data environment, various relationships are essential for showi
 
 1.  Each supplier can supply multiple products, but only one supplier can provide each product (1 to N). ![Supplier- product relationship set](1.png){fig-align="center" width="150"}
 
-2.  Each customer can order multiple products, and each product can be bought by different customers (M to N). 
-![Customer-product relationship set](2.png){width="150" fig-align="center"}
+2.  Each customer can order multiple products, and each product can be bought by different customers (M to N). ![Customer-product relationship set](2.png){width="150" fig-align="center"}
 
-3.  Each category can have multiple products, and each product can be under multiple categories, such as blender under kitchen and electrical appliances (M to N). 
-![Product-category relationship set](3.png){width="150" fig-align="center"}
+3.  Each category can have multiple products, and each product can be under multiple categories, such as blender under kitchen and electrical appliances (M to N). ![Product-category relationship set](3.png){width="150" fig-align="center"}
 
-4.  Each product can have multiple ads, but an ad can be for a sole product (1 to N). 
-![Ad-Product relationship set](4.png){width="150" fig-align="center"}
+4.  Each product can have multiple ads, but an ad can be for a sole product (1 to N). ![Ad-Product relationship set](4.png){width="150" fig-align="center"}
 
 \newpage
 
-5.  Each transaction can only have one order detail, and each order detail only belongs to one transaction (1 to 1). 
-![Order detail-transaction relationship set](5.png){width="150" fig-align="center"}
+5.  Each transaction can only have one order detail, and each order detail only belongs to one transaction (1 to 1). ![Order detail-transaction relationship set](5.png){width="150" fig-align="center"}
 
-6.  Each customer can have multiple order details, but each order detail can only be under one customer (1 to N). 
-![Customer-order detail relationship set](6.png){width="150" fig-align="center"}
+6.  Each customer can have multiple order details, but each order detail can only be under one customer (1 to N). ![Customer-order detail relationship set](6.png){width="150" fig-align="center"}
 
 7.  Each product can be within multiple order details, and each order detail can have many products (M to N). ![Product-order detail relationship set](7.png){width="150" fig-align="center"}
-
 
 \newpage
 
@@ -70,7 +64,7 @@ In an e-commerce data environment, various relationships are essential for showi
 
 ### Logical Schema
 
-The logical schema given below outlines the fundamental components of our e-commerce database: customer, product, category, supplier, ad, order, order detail and transaction, as well as their attributes and relationship tables. This is the textual description of our database tables and their columns: 
+The logical schema given below outlines the fundamental components of our e-commerce database: customer, product, category, supplier, ad, order, order detail and transaction, as well as their attributes and relationship tables. This is the textual description of our database tables and their columns:
 
 1.  supplier ([supplier_id]{.underline} (PK), supplier_name, rating, country, street_name, house_no, postcode)
 
@@ -92,98 +86,25 @@ The logical schema given below outlines the fundamental components of our e-comm
 
 ### Physical Schema
 
-Using the logical schema, the physical schema is generated using RSQLite in R. It can be seen in Appendix A.
+Using the logical schema, the physical schema is generated using RSQLite in R. It can be seen as follows:
 
-\newpage
-
-# Part 2: Data Generation and Management
-
-## 2.1: Synthetic Data Generation
-
-Various packages such as ‘charlatan’, ‘fakir’ and ‘generator’ in R generate categorical variables like customer/product/supplier names and street names. The integer columns are generated using sampling from different distributions in R, which are exponential, gamma and uniform. The date attribute is also created by sampling from a date range provided by the team. The first phase is generated inside “First_Phase_Data_Load.R” and stored by adding “seed”. Since all data is generated manually, all properties of the data violating 1NF are resolved during the generation stage. 
-
-For example, a standard address consists of many parts, including postcode, house number, street name, and country. When generating address data, we separate these parts into four columns to maintain a single value in each column. Similarly, we separated names into last names and first names. Also, inside the database, total price of an order is also kept. This is a derived column calculated as sum of product_price * quantity for all products purchased inside an order. Since it distorts normalization, total price column is stored inside a temporary view and updated generically once new orders are placed by customers. At the end of this stage, our synthetic data is normalized and adheres to the rules of 1NF, 2NF and 3NF. 
-
-## 2.2: Data Import and Quality Assurance
-
-The data generated is split into two parts. Initially, the first load is imported to the database inside “First_Phase_Data_Load.R”. After import, data is validated by checking the uniqueness of all primary keys and unique values like credit card number, email and mobile number and data is also validated for duplicate checks. The format and validity of all columns in tables are checked one by one to construct data integrity. Besides these, referential integrity and missing value checks are also conducted for primary keys and all entries having NOT NULL constraint in physical schema. By rigorously validating our dataset, we ensured its reliability and suitability for subsequent analysis. 
-
-\newpage
-
-# Part 3: Data Pipeline Generation
-
-## 3.1: GitHub Repository and Workflow Setup
-
-The GitHub repository "Demo_Group10" includes workflows, R scripts and a database to manage the project. Initially, the workflow installs the R packages used in R scripts. Next, R scripts, which are used in automation, are executed. There are three scripts executed in the project workflow: "Second_Phase_Data_Load.R", "Validation.R", and "Data_Analysis.R", respectively. The workflow also includes the collaborator names. Ultimately, the workflow automatically commits and pushes the processing results to the GitHub repository. 
-
-## 3.2: GitHub Actions for Continuous Integration
-
-In this part, we set up workflows to implement GitHub actions that perform tasks such as running data validation, updating the database, and automatically running fundamental data analysis.
-
-The new data arrives in the database by executing "Second_Phase_Data_Load.R". The system first controls whether this has a primary key already in the corresponding table or not inside "Second_Phase_Data_Load.R" before appending the new data. If it has a new primary key and unique values for the columns specified in the schema, these entries are accepted, and the database is updated with these proper rows. The remaining entries with invalid columns are rejected and the number of them is kept inside" Invalid_Entries.txt ". After the database is updated, our workflow automatically checks the format of these newly added entries by executing "Validation.R". After completing these checks, our workflow updates the results inside "Validation.R" according to our updated database. Finally, the workflow automatically commits and pushes the processing results to the GitHub repository.
-
-\newpage
-
-# Part 4: Data Analysis and Reporting with Quarto in R
-
-## 4.1: Advanced Data Analysis in R
-
-We conducted advanced data analysis based on our e-commerce data in this part. Our analysis focused on several critical areas for understanding customer behaviour, product performance, and market trends.
-
-We started by analysing customers' payment methods to help businesses better meet customer needs and ensure that the process is user-friendly for such payments. Next, we analysed the best sellers of each category, most popular category, the final price of order distribution with respect to payment method, and which product has the highest rating in each category to identify current consumer trends and preferences. In addition, we also analysed the top 20 customers to help us monitor specific trends and metrics. 
-
-## 4.2: Comprehensive Reporting with Quarto
-
-E-commerce databases contain vast amounts of data related to customer behaviour, sales trends, product performance, and more. The data in the visuals below are derived from our e-commerce database and include information about the number of products sold, the highest selling category, frequent payment methods and the most used product within each category in the latest updated database on 16th March. 
-
-![Payment method comparision](payment.jpeg){width="400" fig-align="center"}
-
-The bar chart displays the payment methods, with the highest frequencies for debit Cards and the lowest for PayPal. This indicates that customers prefer to use a Debit Card while purchasing products from our site.
-
-![Products by category](best_sellers.jpg){width="400" fig-align="center"}
-
-The bar chart shows quantities of products categorised by colour-coded categories, with 'Multifunction Tracker E Pro' being the most abundant in the 'Pets and Animals' category.
-
-![Popular category](top_category.jpeg){width="400" fig-align="center"}
-
-The above visual illustrates the popularity of different categories based on our latest database analysis. We can identify that the most popular category is 'Fitness' followed by 'Pets and Animals'. The least favourite category on our site is 'Gaming'.
-
-![Distribution of orders](basket_price.jpeg){width="400" fig-align="center"}
-
-We can understand from the visual that most orders are concentrated in the lower price ranges (towards the left side of the histogram), which suggests that cheaper items are more commonly purchased.
-
-Credit card payments (red) are the most popular across all price ranges, followed by debit cards (green) and PayPal (cyan). Payment methods such as Pay at Door (blue) and Transfer (magenta) are also used but less than credit/debit cards and PayPal. Voucher payments (yellow) are the least represented in this dataset, indicating they are the least used payment method among the customers represented in this data. The plot also shows that as the price increases, the frequency of orders decreases, which is typical in consumer behaviour as higher-priced items tend to be purchased less frequently.
-
-We have three CSV files named – 'top 20 customers', 'most_popular_category' and 'highest_rating_per_category, which help us to monitor specific trends and metrics. This information helps us to understand the current market better.
-
-# Challenges
-
-Ecommerce databases often involve complex data models due to the variety of entities and relationships involved. So, designing a database, choosing the right entities, and figuring out the proper relationships while maintaining data integrity was challenging. In the data generation stage, it was important to ensure quality of generated data. Since randomly generated data may not always reflect the real-world scenarios accurately and can lead to inconsistent or unrealistic data, validating and verifying the generated data was a challenge to the project. Apart from that, we have a derived column which is stored as view, so it was important to validate derived column values against the source data and ensure that the calculations accurately reflect the intended logic. Overall, addressing these challenges required proper planning and validation to ensure the integrity and accuracy of our Ecommerce database.
-
-# Conclusion
-
-It is essential in business to analyze and track data daily to implement necessary actions
-
-\newpage
-
-# Appendix
-
-## Appendix A. Physical Schema
-
-```{r eval=FALSE}
+```{r}
 library(dplyr)
 library(tidyr)
 library(fakir)
 library(charlatan)
 library(generator)
 library(RSQLite)
+library(ggplot2)
+
 
 # Connecting to database
 schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
 
+```
 
-# Creating tables
-
+```{r}
+# Creating supplier table
 create_supplier <- '
   CREATE TABLE IF NOT EXISTS "supplier" (
     "supplier_id" INTEGER PRIMARY KEY,
@@ -197,8 +118,10 @@ create_supplier <- '
 '
 
 dbExecute(schema_db, create_supplier)
+```
 
-
+```{r}
+# Creating product table
 create_product <- '
 CREATE TABLE IF NOT EXISTS "product" (
   "product_id" INTEGER PRIMARY KEY,
@@ -213,7 +136,10 @@ CREATE TABLE IF NOT EXISTS "product" (
 '
 
 dbExecute(schema_db, create_product)
+```
 
+```{r}
+# Creating customer table
 create_customer <- '
 CREATE TABLE IF NOT EXISTS "customer" (
   "customer_id" INTEGER PRIMARY KEY,
@@ -230,8 +156,10 @@ CREATE TABLE IF NOT EXISTS "customer" (
 '
 
 dbExecute(schema_db, create_customer)
+```
 
-
+```{r}
+# Creating ad table
 create_ad <- '
 CREATE TABLE IF NOT EXISTS "ad" (
   "ad_id" INTEGER PRIMARY KEY,
@@ -243,8 +171,10 @@ CREATE TABLE IF NOT EXISTS "ad" (
 '
 
 dbExecute(schema_db, create_ad)
+```
 
-
+```{r}
+# Creating category table
 create_category <- '
 CREATE TABLE IF NOT EXISTS "category" (
   "category_id" INTEGER PRIMARY KEY,
@@ -253,8 +183,10 @@ CREATE TABLE IF NOT EXISTS "category" (
 '
 
 dbExecute(schema_db, create_category)
+```
 
-
+```{r}
+# Creating joint_in table
 create_joint_in <- '
 CREATE TABLE IF NOT EXISTS "joint_in" (
   "product_id" INTEGER,
@@ -263,9 +195,11 @@ CREATE TABLE IF NOT EXISTS "joint_in" (
   FOREIGN KEY ("category_id") REFERENCES category("category_id")
 );
 '
-
 dbExecute(schema_db, create_joint_in)
+```
 
+```{r}
+# creating transaction table
 create_transaction <- '
 CREATE TABLE IF NOT EXISTS "transaction" (
   "transaction_id" INTEGER PRIMARY KEY,
@@ -276,8 +210,9 @@ CREATE TABLE IF NOT EXISTS "transaction" (
 '
 
 dbExecute(schema_db, create_transaction)
+```
 
-
+```{r}
 create_order_detail <- '
 CREATE TABLE IF NOT EXISTS "order_detail" (
   "order_detail_id" INTEGER PRIMARY KEY,
@@ -289,8 +224,10 @@ CREATE TABLE IF NOT EXISTS "order_detail" (
 '
 
 dbExecute(schema_db, create_order_detail)
+```
 
-
+```{r}
+# Creating joint_order table
 create_joint_order <- '
 CREATE TABLE IF NOT EXISTS "joint_order" (
   "order_detail_id" INTEGER,
@@ -311,19 +248,15 @@ dbDisconnect(schema_db)
 
 \newpage
 
-## Appendix B. Synthetic Data Generation and Import
+# Part 2: Data Generation and Management
 
-First phase data load
+## 2.1: Synthetic Data Generation
 
-```{r eval=FALSE}
+Various packages such as ‘charlatan’, ‘fakir’ and ‘generator’ in R generate categorical variables like customer/product/supplier names and street names. The integer columns are generated using sampling from different distributions in R, which are exponential, gamma and uniform. The date attribute is also created by sampling from a date range provided by the team. The first phase is generated inside “First_Phase_Data_Load.R” and stored by adding “seed”. Since all data is generated manually, all properties of the data violating 1NF are resolved during the generation stage.
 
-library(dplyr)
-library(fakir)
-library(charlatan)
-library(generator)
-library(tidyr)
-library(RSQLite)
+For example, a standard address consists of many parts, including postcode, house number, street name, and country. When generating address data, we separate these parts into four columns to maintain a single value in each column. Similarly, we separated names into last names and first names.
 
+```{r}
 schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
 
 # 1.Customers Table
@@ -380,8 +313,10 @@ customer$postcode <- fake_postcodes
 # Adjust the columns to fit database
 customer <- customer[, c(1, 4, 2, 3, 5, 6, 7, 8, 9, 10)]
 
-# ------------------
 
+```
+
+```{r}
 # 2.Suppliers Table
 
 set.seed(5)
@@ -422,8 +357,9 @@ Suppliers$House_No <- house_noo
 fake_postcodess <- paste0(sample(LETTERS, 30, replace = TRUE), sample(LETTERS, 30, replace = TRUE), sample(0:9, 30, replace = TRUE), " ", sample(0:9, 30, replace = TRUE), sample(LETTERS, 30, replace = TRUE), sample(LETTERS, 30, replace = TRUE))
 Suppliers$Postcode <- fake_postcodess
 
-# ------------------
+```
 
+```{r}
 # 3.Products Table
 
 set.seed(6)
@@ -463,8 +399,10 @@ product$availability <- availability
 supplierid_list <- c(Suppliers$Supplier_ID)
 product$supplier_id <- sample(supplierid_list, 1000, replace = TRUE)
 
-# ------------------
 
+```
+
+```{r}
 # 4.Ad Table
 
 set.seed(7)
@@ -486,9 +424,9 @@ ad$duration <- round(duration,2)
 # Cost
 cost <- runif(1000, min = 0, max = 1) * 50
 ad$cost <- round(cost,2)
+```
 
-# ------------------
-
+```{r}
 # 5.Category Table
 
 set.seed(8)
@@ -501,10 +439,10 @@ names(category)[names(category) == "value"] <- "category_id"
 # Name
 namess <- category_column
 category$category_name <- unique(namess)
+```
 
-# ------------------
-
-# 7.Transactions Table
+```{r}
+# 6.Transactions Table
 
 set.seed(10)
 
@@ -517,10 +455,10 @@ names(transaction)[names(transaction) == "value"] <- 'transaction_id'
 method <- c('Credit Card', 'Transfer', 'Pay at Door', 'PayPal', 'Debit Card', 'Voucher')
 types <- paste(sample(method, 1500, replace = TRUE))
 transaction$payment_method <- types
+```
 
-# ------------------
-
-# 6.Order Details Table
+```{r}
+# 7.Order Details Table
 
 set.seed(9)
 
@@ -551,9 +489,9 @@ transaction$order_detail_id <- sample(orderid_list, 1500, replace = FALSE)
 
 # transaction_id added as a foreign key
 order_detail <- merge(x = order_detail, y = transaction, by = 'order_detail_id') %>% select(-payment_method)
+```
 
-# ------------------
-
+```{r}
 # Joint table for relation 'In' including category_id and product_id as foreign keys
 set.seed(647823)
 
@@ -561,7 +499,9 @@ joint_in <- left_join(product, category, by = 'category_name')
 joint_in <- joint_in %>% select(product_id, category_id)
 
 product <- product %>% select(-category_name)
+```
 
+```{r}
 # Joint table for relation 'Order' including order_detail_id, customer_id, product_id and quantity
 set.seed(2435345)
 my_function <- function(n) {
@@ -592,20 +532,55 @@ my_function <- function(n) {
 }
 
 result <- my_function(1500)
+```
 
+```{r}
 # Remove any duplicate row/entry
 joint_order <- distinct(result, order_detail_id, customer_id, product_id, .keep_all = TRUE)
 names(joint_order)[names(joint_order) == "order_detail$order_detail_id"] <- 'order_detail_id'
 names(joint_order)[names(joint_order) == "customer$customer_id"] <- 'customer_id'
 names(joint_order)[names(joint_order) == "product$product_id"] <- 'product_id'
 
-# ------------------
+```
 
+```{r}
 # Adjust the order of columns to fit database
 order_detail <- order_detail[, c(1, 4, 2, 3)]
 transaction <- transaction[, c(1, 3, 2)]
 product <- product[, c(3, 7, 1, 4, 2, 5, 6)]
+```
 
+Also, inside the database, total price of an order is also kept. This is a derived column calculated as sum of product_price \* quantity for all products purchased inside an order.
+
+```{r}
+# Calculation of Total Price of Orders after Discounts are applied
+
+create_price_view <- '
+
+CREATE VIEW IF NOT EXISTS final_price_of_order AS SELECT order_detail_id, subtotal, discount, subtotal*(1-discount*0.01) AS final_price FROM 
+(SELECT A.order_detail_id, COUNT(A.product_id) AS no_of_products, SUM(A.total_price_for_each_product) AS subtotal, O.discount FROM 
+(SELECT J.order_detail_id, J.product_id, P.price, J.quantity, (P.price* J.quantity) AS total_price_for_each_product FROM joint_order J 
+JOIN 
+product p WHERE J.product_id = P.product_id) A 
+JOIN 
+order_detail O ON A.order_detail_id = O.order_detail_id GROUP BY A.order_detail_id);
+
+'
+
+dbExecute(schema_db, create_price_view)
+
+view_query <- 'SELECT * FROM final_price_of_order'
+view_result <- dbGetQuery(schema_db, view_query)
+
+```
+
+Since it distorts normalization, total price column is stored inside a temporary view and updated generically once new orders are placed by customers. At the end of this stage, our synthetic data is normalized and adheres to the rules of 1NF, 2NF and 3NF.
+
+## 2.2: Data Import and Quality Assurance
+
+The data generated is split into two parts. Initially, the first load is imported to the database inside “First_Phase_Data_Load.R”. After import, data is validated by checking the uniqueness of all primary keys and unique values like credit card number, email and mobile number and data is also validated for duplicate checks. The format and validity of all columns in tables are checked one by one to construct data integrity. Besides these, referential integrity and missing value checks are also conducted for primary keys and all entries having NOT NULL constraint in physical schema. By rigorously validating our dataset, we ensured its reliability and suitability for subsequent analysis.
+
+```{r}
 # # Data Integrity and Quality Check
 
 # Testing for any duplication of primary keys or unique values
@@ -659,302 +634,31 @@ dbWriteTable(my_db, "category", category, overwrite= TRUE)
 dbWriteTable(my_db, "joint_in", joint_in, overwrite= TRUE)
 dbWriteTable(my_db, "joint_order", joint_order, overwrite= TRUE)
 
-# ------------------
-
-# Calculation of Total Price of Orders after Discounts are applied
-
-create_price_view <- '
-
-CREATE VIEW IF NOT EXISTS final_price_of_order AS SELECT order_detail_id, subtotal, discount, subtotal*(1-discount*0.01) AS final_price FROM 
-(SELECT A.order_detail_id, COUNT(A.product_id) AS no_of_products, SUM(A.total_price_for_each_product) AS subtotal, O.discount FROM 
-(SELECT J.order_detail_id, J.product_id, P.price, J.quantity, (P.price* J.quantity) AS total_price_for_each_product FROM joint_order J 
-JOIN 
-product p WHERE J.product_id = P.product_id) A 
-JOIN 
-order_detail O ON A.order_detail_id = O.order_detail_id GROUP BY A.order_detail_id);
-
-'
-
-dbExecute(schema_db, create_price_view)
-
-view_query <- 'SELECT * FROM final_price_of_order'
-view_result <- dbGetQuery(schema_db, view_query)
-
 dbDisconnect(schema_db)
-
 ```
 
 \newpage
 
-Second phase data load
+# Part 3: Data Pipeline Generation
 
-```{r eval=FALSE}
+## 3.1: GitHub Repository and Workflow Setup
 
-library(dplyr)
-library(fakir)
-library(charlatan)
-library(generator)
-library(tidyr)
-library(RSQLite)
+The GitHub repository "Demo_Group10" includes workflows, R scripts and a database to manage the project. Initially, the workflow installs the R packages used in R scripts. Next, R scripts, which are used in automation, are executed. There are three scripts executed in the project workflow: "Second_Phase_Data_Load.R", "Validation.R", and "Data_Analysis.R", respectively. The workflow also includes the collaborator names. Ultimately, the workflow automatically commits and pushes the processing results to the GitHub repository.
 
-schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
+## 3.2: GitHub Actions for Continuous Integration
 
-# Some of the remaining data is generated and then uploaded to the database after validation of data
+In this part, we set up workflows to implement GitHub actions that perform tasks such as running data validation, updating the database, and automatically running fundamental data analysis. The new data arrives in the database by executing "Second_Phase_Data_Load.R". The system first controls whether this has a primary key already in the corresponding table or not inside "Second_Phase_Data_Load.R" before appending the new data. If it has a new primary key and unique values for the columns specified in the schema, these entries are accepted, and the database is updated with these proper rows. The remaining entries with invalid columns are rejected and the number of them is kept inside" Invalid_Entries.txt ".
 
-# 1.Customers Table
+After the database is updated, our workflow automatically checks the format of these newly added entries by executing "Validation.R". After completing these checks, our workflow updates the results inside "Validation.R" according to our updated database. Finally, the workflow automatically commits and pushes the processing results to the GitHub repository.
 
-# ID
-numbers_colon <- sample(110000:210000, 5, replace = FALSE)
-
-customer <- as_tibble(numbers_colon)
-names(customer)[names(customer) == "value"] <- "customer_id"
-
-# Name
-person_provider <- PersonProvider$new()
-
-random_first_names <- replicate(5, person_provider$first_name(), )
-random_last_names <- replicate(5, person_provider$last_name(), )
-random_full_names <- paste(random_first_names, random_last_names)
-
-customer$name <- random_full_names
-customer$name_modified <- gsub(" ", "_", customer$name)
-customer$email <- paste0(customer$name_modified, "@mail.com")
-customer <- customer %>%
-  separate(name, into = c("First_Name", "Last_Name"), sep = " ")
-customer <- customer %>% select(-name_modified)
-
-# 1000 fake phone numbers
-lower_limit <- 4400000000000
-upper_limit <- 4499999999999
-fake_mobile_numbers <- runif(5, min = 0, max = 1) * (upper_limit - lower_limit) + lower_limit
-
-customer$mobile_no <- paste("+", as.character(round(fake_mobile_numbers)), sep = "")
-
-# Credit Card Number
-customer$credit_card_no <- ch_credit_card_number(n = 5)
-
-# Country
-customer$country <- "UK"
-
-# Street Names
-street_elements <- c("Maple", "Main", "Oak", "Elm", "Cedar", "High", "Park", "Station", "Green", "Hill", 'Oxford', 'Liverpool', 'Westwood', 'Scarman', 'Gibbet Hill', 'Stoneleigh', 'Earlsdon', 'Lynchgate', 'Centenary', 'New', 'Moore', 'Abberton', 'Davenport', 'Cryfield', 'Lillington', 'Starley', 'Renown', 'Lakewood', 'Glasgow', 'Warwick', 'Stratford', 'Leighton', 'Chelsea')
-fake_street_names <- paste(sample(street_elements, 5, replace = TRUE))
-
-customer$street_name <- fake_street_names
-
-# House Number
-house_no <- sample(1:75, 5, replace = TRUE)
-customer$house_no <- house_no
-
-# UK-style postcodes
-fake_postcodes <- paste0(sample(LETTERS, 5, replace = TRUE), sample(LETTERS, 5, replace = TRUE), sample(0:9, 5, replace = TRUE), " ", sample(0:9, 5, replace = TRUE), sample(LETTERS, 5, replace = TRUE), sample(LETTERS, 5, replace = TRUE))
-customer$postcode <- fake_postcodes
-
-# Adjust the columns to fit database
-customer <- customer[, c(1, 4, 2, 3, 5, 6, 7, 8, 9, 10)]
-
-# ------------------
-
-# Extracting product_id using SQL query
-create_product_id_query <- 'SELECT product_id FROM product;
-'
-dbExecute(schema_db, create_product_id_query)
-product_idd <- dbGetQuery(schema_db, create_product_id_query)
-product_idd <- as_tibble(product_idd)
-
-# ------------------
-
-# 7.Transactions Table
-
-
-# ID
-transaction_id <- sample(610001:710000, 10, replace = FALSE)
-transaction <- as_tibble(transaction_id)
-names(transaction)[names(transaction) == "value"] <- 'transaction_id'
-
-# Payment Method
-method <- c('Credit Card', 'Transfer', 'Pay at Door', 'PayPal', 'Debit Card', 'Voucher')
-types <- paste(sample(method, 10, replace = TRUE))
-transaction$payment_method <- types
-
-# ------------------
-
-# 6.Order Details Table
-
-
-# ID
-order_details_id <- sample(510001:610000, 10, replace = FALSE)
-order_detail <- as_tibble(order_details_id)
-names(order_detail)[names(order_detail) == "value"] <- 'order_detail_id'
-
-# Delivery Date
-start_date <- as.Date("2024-03-20")
-end_date <- as.Date("2024-08-20") 
-date_sequence <- seq.Date(start_date, end_date, by = "1 day")
-
-dates <- sample(date_sequence, 10, replace = TRUE)
-order_detail$delivery_date <- as.character(dates)
-
-# Discount
-lower_percentage <- seq(from = 5, to = 45, by = 5)
-lower_percentages <- sample(lower_percentage, 7, replace = TRUE)
-upper_percentage <- seq(from = 50, to = 75, by = 5)
-upper_percentages <- sample(upper_percentage, 3, replace = TRUE)
-percentages <- c(lower_percentages, upper_percentages)
-order_detail$discount <- paste(percentages, '%', sep = '')
-
-# order_detail_id
-orderid_list <- c(order_detail$order_detail_id)
-transaction$order_detail_id <- sample(orderid_list, 10, replace = FALSE)
-
-# transaction_id added as a foreign key
-
-order_detail <- merge(x = order_detail, y = transaction, by = 'order_detail_id') %>% select(-payment_method)
-
-# ------------------
-
-order_detail <- order_detail[, c(1, 4, 2, 3)]
-transaction <- transaction[, c(1, 3, 2)]
-
-# # Data Integrity and Quality Check
-
-# Formatting Email column in Customers Table
-customer$email <- gsub("'", "", customer$email)
-
-# Before inserting, we need to make a check for duplicates by making comparison with the existing database table values
-
-duplicate_check_customer <- 'SELECT customer_id, email, mobile_no, credit_card_no from customer;'
-dbExecute(schema_db, duplicate_check_customer)
-customer_dup <- dbGetQuery(schema_db, duplicate_check_customer)
-customer_dup  <- as_tibble(customer_dup)
-
-duplicate_check_order <- 'SELECT order_detail_id from order_detail;'
-dbExecute(schema_db, duplicate_check_order)
-order_dup <- dbGetQuery(schema_db, duplicate_check_order)
-order_dup  <- as_tibble(order_dup)
-
-duplicate_check_trans <- 'SELECT transaction_id from "transaction";'
-dbExecute(schema_db, duplicate_check_trans)
-trans_dup <- dbGetQuery(schema_db, duplicate_check_trans)
-trans_dup  <- as_tibble(trans_dup)
-
-# Remove any duplicate row/entry
-unique_customer <- anti_join(customer, customer_dup, by = 'customer_id')
-unique_customer2 <- anti_join(unique_customer, customer_dup, by = 'email')
-unique_customer3 <- anti_join(unique_customer2, customer_dup, by = 'credit_card_no')
-unique_customer_fin <- anti_join(unique_customer3, customer_dup, by = 'mobile_no')
-unique_order <- anti_join(order_detail, order_dup, by = 'order_detail_id')
-unique_trans <- anti_join(transaction, trans_dup, by = 'transaction_id')
-unique_trans <- semi_join(transaction, unique_order, by = 'transaction_id')
-
-# Keeping record of invalid entries if any
-invalid_orders <- anti_join(order_detail, unique_order, by = 'order_detail_id')
-invalid_transactions <- anti_join(transaction, unique_trans, by = 'transaction_id')
-invalid_customers <- anti_join(customer, unique_customer_fin, by = 'customer_id')
-
-ord <- paste0('The number of invalid order entries ', nrow(invalid_orders))
-tra <- paste0('The number of invalid transaction entries are ', nrow(invalid_transactions))
-cus <- paste0('The number of invalid customer entries are ', nrow(invalid_customers))
-
-all_messages <- c(ord, tra, cus)
-write.table(all_messages, "Invalid_Entries.txt", sep = "\n", row.names = FALSE, col.names = FALSE)
-
-
-# Joint table for relation 'Order' including order_detail_id, customer_id, and product_id
-
-my_function <- function(n) {
-  x_t <- data.frame(order_detail_id = integer(),
-                    customer_id = integer(),
-                    product_id = integer(),
-                    quantity = integer())
-  
-  for (i in 1:n) {
-    ch_order_detail_id <- unique_order$order_detail_id[i]
-    ch_customer_id <- sample(unique_customer_fin$customer_id, 1)
-    no_of_product <- as.integer(rexp(1, rate = 1/5))
-    y <- product_idd
-    
-    for (j in 1:no_of_product) {
-      ch_product_id <- sample(y$product_id, 1, replace = FALSE) 
-      quantity <- sample(1:5, 1)
-      
-      # Append to data frame
-      x_t <- rbind(x_t, data.frame(order_detail_id = ch_order_detail_id,
-                                   customer_id = ch_customer_id,
-                                   product_id = ch_product_id,
-                                   quantity = quantity))
-    }
-  }
-  
-  return(as_tibble(x_t))
-}
-new_orders <- my_function(10)
-
-# Rename the columns of joint_order table
-joint_order <- distinct(new_orders, order_detail_id, customer_id, product_id, .keep_all = TRUE)
-names(joint_order)[names(joint_order) == "order_detail$order_detail_id"] <- 'order_detail_id'
-names(joint_order)[names(joint_order) == "customer$customer_id"] <- 'customer_id'
-names(joint_order)[names(joint_order) == "product$product_id"] <- 'product_id'
-
-# ------------------
-
-
-## Inserting fake data into schema 
-
-
-my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
-dbWriteTable(my_db, "transaction", unique_trans, append= TRUE)
-dbWriteTable(my_db, "order_detail", unique_order, append= TRUE)
-dbWriteTable(my_db, "customer", unique_customer_fin, append= TRUE)
-
-# Joint tables
-dbWriteTable(my_db, "joint_order", joint_order, append= TRUE)
-
-# ------------------
-
-# Calculation of Total Price of Orders after Discounts are applied
-create_price_view <- '
-
-CREATE VIEW IF NOT EXISTS final_price_of_order AS SELECT order_detail_id, subtotal, discount, subtotal*(1-discount*0.01) AS final_price FROM 
-(SELECT A.order_detail_id, COUNT(A.product_id) AS no_of_products, SUM(A.total_price_for_each_product) AS subtotal, O.discount FROM
-(SELECT J.order_detail_id, J.product_id, P.price, J.quantity, (P.price* J.quantity) AS total_price_for_each_product FROM joint_order J 
-JOIN 
-product p WHERE J.product_id = P.product_id) A 
-JOIN 
-order_detail O ON A.order_detail_id = O.order_detail_id GROUP BY A.order_detail_id);
-
-'
-dbExecute(schema_db, create_price_view)
-
-# Exhibit the view and calculated field(Total Price of Order)
-view_query <- 'SELECT * FROM final_price_of_order'
-view_result <- dbGetQuery(schema_db, view_query)
-
-dbDisconnect(schema_db)
-
-```
-
-\newpage
-
-## Appendix C. Data Validation
-
-```{r eval=FALSE}
-
-library(DBI)
-library(dplyr)
-library(RSQLite)
-
-# Running data validation
-
+```{r}
+## Running data validation
 # Connect to database
 my_db <- RSQLite::dbConnect(RSQLite::SQLite(),"ECommerce.db")
 
 # 1. Customer Table
 
 customer <- dbReadTable(my_db, "customer")
-
-
-# 1. Customer Table
 
 # Customer ID (6-digit)
 validate_customer_id <- function(customer_id) {
@@ -1035,10 +739,9 @@ print(invalid_counts_customer)
 
 customer_duplicates <- dbGetQuery(my_db, "SELECT customer_id, count(*) from customer group by customer_id having count(*) > 1")
  print(paste("No:of duplicates for customer table is ",nrow(customer_duplicates)))
+```
 
-
-
-
+```{r}
 # 2. Supplier Table
 
 supplier <- dbReadTable(my_db, "supplier")
@@ -1109,8 +812,9 @@ print(invalid_counts_supplier)
 
 supplier_duplicates <- dbGetQuery(my_db, "SELECT supplier_id, count(*) from supplier group by supplier_id having count(*) > 1")
 print(paste("No:of duplicates for supplier table is ",nrow(supplier_duplicates)))
+```
 
-
+```{r}
 # 3. Ad Table
 
 ad <- dbReadTable(my_db, "ad")
@@ -1169,9 +873,9 @@ print(invalid_counts_ad)
 
 ad_duplicates <- dbGetQuery(my_db, "SELECT ad_id, count(*) from ad group by ad_id having count(*) > 1")
 print(paste("No:of duplicates for ad table is ",nrow(ad_duplicates)))
+```
 
-
-
+```{r}
 # 4. Category Table
 
 category <- dbReadTable(my_db, "category")
@@ -1199,9 +903,9 @@ print(invalid_counts_category)
 
 category_duplicates <- dbGetQuery(my_db, "SELECT category_id, count(*) from category group by category_id having count(*) > 1")
 print(paste("No:of duplicates for category table is ",nrow(category_duplicates)))
+```
 
-
-
+```{r}
 # 5. Transaction Table
 
 transaction <- dbReadTable(my_db, "transaction")
@@ -1241,9 +945,9 @@ print(invalid_counts_transaction)
 
 transaction_duplicates <- dbGetQuery(my_db, "SELECT transaction_id, count(*) from 'transaction' group by transaction_id having count(*) > 1")
 print(paste("No:of duplicates for transaction table is ",nrow(transaction_duplicates)))
+```
 
-
-
+```{r}
 # 6. Order Details Table
 
 order_detail <- dbReadTable(my_db, "order_detail")
@@ -1286,8 +990,9 @@ print(invalid_counts_order_detail)
 
 order_detail_duplicates <- dbGetQuery(my_db, "SELECT order_detail_id, count(*) from order_detail group by order_detail_id having count(*) > 1")
 print(paste("No:of duplicates for order_detail table is ",nrow(order_detail_duplicates)))
+```
 
-
+```{r}
 #7. Products table
 
 product <- dbReadTable(my_db, "product")
@@ -1351,7 +1056,9 @@ print(invalid_counts_product)
 
 product_duplicates <- dbGetQuery(my_db, "SELECT product_id, count(*) from product group by product_id having count(*) > 1")
 print(paste("No:of duplicates for product table is ",nrow(product_duplicates)))
+```
 
+```{r}
 #Referential Integrity
 
 # Product Table
@@ -1393,5 +1100,139 @@ dbExecute(my_db, cat_id_in)
 
 
 dbDisconnect(my_db)
-
 ```
+
+\newpage
+
+# Part 4: Data Analysis and Reporting with Quarto in R
+
+## 4.1: Advanced Data Analysis in R
+
+We conducted advanced data analysis based on our e-commerce data in this part. Our analysis focused on several critical areas for understanding customer behaviour, product performance, and market trends.
+
+We started by analysing customers' payment methods to help businesses better meet customer needs and ensure that the process is user-friendly for such payments. Next, we analysed the best sellers of each category, most popular category, the final price of order distribution with respect to payment method, and which product has the highest rating in each category to identify current consumer trends and preferences. In addition, we also analysed the top 20 customers to help us monitor specific trends and metrics.
+
+## 4.2: Comprehensive Reporting with Quarto
+
+E-commerce databases contain vast amounts of data related to customer behaviour, sales trends, product performance, and more. The data in the visuals below are derived from our e-commerce database and include information about the number of products sold, the highest selling category, frequent payment methods and the most used product within each category in the latest updated database on 16th March.
+
+```{r}
+schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
+
+# Read data
+table_name <- dbListTables(schema_db)
+tables <- list()
+for (name in table_name){
+  tables[[name]] <- dbReadTable(schema_db, name)
+}
+
+## -----------------------------------------------------------------------
+joint_in_table <- tables[["joint_in"]]
+joint_order_table <- tables[["joint_order"]]
+```
+
+```{r}
+# Payment methods
+transaction_table <- tables[["transaction"]]
+payment_plot <- ggplot(transaction_table, aes(x = payment_method))+
+  geom_bar(fill = 'indianred3') +
+  labs(x = "Payment Method", y = "Count")
+
+payment_plot
+```
+
+The bar chart displays the payment methods, with the highest frequencies for debit Cards and the lowest for PayPal. This indicates that customers prefer to use a Debit Card while purchasing products from our site.
+
+```{r}
+# Best sellers for each category
+product_table <- tables[["product"]]
+category_table <- tables[["category"]]
+
+bsec <- product_table %>% 
+  left_join(joint_in_table, by = "product_id") %>%
+  left_join(category_table, by = "category_id") %>%
+  left_join(joint_order_table, by = "product_id")
+
+best_sellers <- bsec %>%
+  group_by(category_name, product_name) %>%
+  summarise(total_quantity = sum(quantity), .groups = 'drop') %>%
+  group_by(category_name) %>%
+  arrange(desc(total_quantity)) %>%
+  slice(1) %>% 
+  ungroup()
+
+bests <- ggplot(best_sellers) +
+  geom_bar(aes(x = product_name, y = total_quantity, fill = category_name), 
+           stat = "identity") + 
+  labs(x = "Products", y = "Quantity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+bests
+```
+
+The bar chart shows quantities of products categorised by colour-coded categories, with 'Multifunction Tracker E Pro' being the most abundant in the 'Pets and Animals' category.
+
+```{r}
+# Which category is the most popular
+
+category_table <- tables[["category"]]
+product_table <- tables[["product"]]
+customer_table <- tables[["customer"]]
+joint_in_table <- tables[["joint_in"]]
+
+# Step 1: Join the product and category tables using the joint table
+product_category_join <- joint_in_table%>%
+  inner_join(product_table, by = "product_id") %>%
+  inner_join(category_table, by = "category_id")
+
+# Step 2: Aggregate the data to count occurrences of each category
+category_counts <- product_category_join %>%
+  group_by(category_name) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+# Step 3: Print or visualize the results to identify the most popular category
+most_popular_category <- category_counts$category_name[1]
+print(paste("The most popular category is:", most_popular_category))
+
+# Writing it into the csv file
+
+write.csv(most_popular_category ,"most_popular_category.csv", row.names = FALSE)
+
+
+top_cat <- ggplot(category_counts, aes(x = reorder(category_name, -count), y = count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(x = "Category", y = "Number of Products", title = "Popularity of Categories") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  coord_flip()
+top_cat
+```
+
+The above visual illustrates the popularity of different categories based on our latest database analysis. We can identify that the most popular category is 'Fitness' followed by 'Pets and Animals'. The least favourite category on our site is 'Gaming'.
+
+```{r}
+# Final price of orders distribution with respect to payment method
+tot_price <- 'SELECT final_price, order_detail_id FROM final_price_of_order'
+view_tot <- dbGetQuery(schema_db, tot_price)
+view_tot <- as_tibble(view_tot)
+
+transaction_table <- tables[["transaction"]]
+transaction_table <- left_join(transaction_table, view_tot, by = 'order_detail_id')
+basket <- ggplot(transaction_table, aes(final_price, fill = payment_method)) +
+  geom_histogram(binwidth = 2000) +
+  labs(title = 'Distribution of Orders based on Payment Method', x = 'Price', y = 'Frequency') 
+basket
+```
+
+We can understand from the visual that most orders are concentrated in the lower price ranges (towards the left side of the histogram), which suggests that cheaper items are more commonly purchased.
+
+Credit card payments (red) are the most popular across all price ranges, followed by debit cards (green) and PayPal (cyan). Payment methods such as Pay at Door (blue) and Transfer (magenta) are also used but less than credit/debit cards and PayPal. Voucher payments (yellow) are the least represented in this dataset, indicating they are the least used payment method among the customers represented in this data. The plot also shows that as the price increases, the frequency of orders decreases, which is typical in consumer behaviour as higher-priced items tend to be purchased less frequently.
+
+We have three CSV files named – 'top 20 customers', 'most_popular_category' and 'highest_rating_per_category, which help us to monitor specific trends and metrics. This information helps us to understand the current market better.
+
+# Challenges
+
+Ecommerce databases often involve complex data models due to the variety of entities and relationships involved. So, designing a database, choosing the right entities, and figuring out the proper relationships while maintaining data integrity was challenging. In the data generation stage, it was important to ensure quality of generated data. Since randomly generated data may not always reflect the real-world scenarios accurately and can lead to inconsistent or unrealistic data, validating and verifying the generated data was a challenge to the project. Apart from that, we have a derived column which is stored as view, so it was important to validate derived column values against the source data and ensure that the calculations accurately reflect the intended logic. Overall, addressing these challenges required proper planning and validation to ensure the integrity and accuracy of our Ecommerce database.
+
+# Conclusion
+
+It is essential in business to analyze and track data daily to implement necessary actions
