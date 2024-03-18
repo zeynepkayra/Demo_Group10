@@ -162,7 +162,8 @@ highest_rating_per_category <- product_rating_join %>%
 print(highest_rating_per_category)
 
 # Optionally, you can save the results to a CSV file
-write.csv(highest_rating_per_category, "highest_rating_per_category.csv", row.names = FALSE)
+write.csv(highest_rating_per_category, 
+          "Data_Analysis/highest_rating_per_category.csv", row.names = FALSE)
 
 
 
