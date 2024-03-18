@@ -1,3 +1,3 @@
 "The number of invalid order entries 0"
 "The number of invalid transaction entries are 0"
-"The number of invalid customer entries are 0"
+"The number of invalid customer entries are 1"
