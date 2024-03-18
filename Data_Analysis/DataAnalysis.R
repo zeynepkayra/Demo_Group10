@@ -31,7 +31,7 @@ payment_plot <- ggplot(transaction_table, aes(x = payment_method))+
   labs(x = "Payment Method", y = "Count")
 
 # Save the plot
-ggsave("payment.jpeg", plot = payment_plot, width = 10, height = 6, dpi = 300)
+ggsave("Data_Analysis/payment.jpeg", plot = payment_plot, width = 10, height = 6, dpi = 300)
 
 
 
@@ -60,7 +60,7 @@ bests <- ggplot(best_sellers) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # Save the plot
-ggsave("bestsellers.jpeg", plot = bests, width = 10, height = 6, dpi = 300)
+ggsave("Data_Analysis/bestsellers.jpeg", plot = bests, width = 10, height = 6, dpi = 300)
 
 
 
@@ -99,7 +99,7 @@ top_cat <- ggplot(category_counts, aes(x = reorder(category_name, -count), y = c
   coord_flip()
 
 # Save the plot
-ggsave("top_category.jpeg", plot = top_cat, width = 10, height = 6, dpi = 300)
+ggsave("Data_Analysis/top_category.jpeg", plot = top_cat, width = 10, height = 6, dpi = 300)
 
 
 ## -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ basket <- ggplot(transaction_table, aes(final_price, fill = payment_method)) +
   labs(title = 'Distribution of Orders based on Payment Method', x = 'Price', y = 'Frequency') 
 
 # Save the plot
-ggsave("basket_price.jpeg", plot = basket, width = 10, height = 6, dpi = 300)
+ggsave("Data_Analysis/basket_price.jpeg", plot = basket, width = 10, height = 6, dpi = 300)
 
 
 ## -----------------------------------------------------------------------
@@ -137,7 +137,7 @@ top_20_customers <- head(customer_order_counts, 20)
 print(top_20_customers)
 
 # Optionally, you can save the top 20 customers to a CSV file
-write.csv(top_20_customers, "top_20_customers.csv", row.names = FALSE)
+write.csv(top_20_customers, "Data_Analysis/top_20_customers.csv", row.names = FALSE)
 
 
 
