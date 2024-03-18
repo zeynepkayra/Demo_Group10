@@ -8,7 +8,7 @@ toc: true
 
 # Introduction
 
-This report reveals the database system of an e-commerce company called “Papa’s Collection” and explains its automated integration inside GitHub. The system is designed with a comprehensive database structure that comprises seven crucial entities. Each entity is crafted with various attributes and relationships to facilitate an efficient, user-friendly experience. Hence, this report will focus on database design, schema creation, data generation, pipeline, and advanced data analysis. 
+This report reveals the database system of an e-commerce company called “Papa’s Collection” and explains its automated integration inside GitHub. The system is designed with a comprehensive database structure that comprises seven crucial entities. Each entity is crafted with various attributes and relationships to facilitate an efficient, user-friendly experience. Hence, this report will focus on database design, schema creation, data generation, pipeline, and advanced data analysis.
 
 # Part 1: Database Design and Implementation
 
@@ -16,47 +16,53 @@ This report reveals the database system of an e-commerce company called “Papa�
 
 ### Entities & Attributes
 
-Our e-commerce database has the following entities: Customers, Products, Categories, Suppliers, Order Details, Transactions, and Ads. The E-R diagram can be seen in Figure 1.
+Our e-commerce database has the following entities: customer, product, category, supplier, order detail, transaction, and ad. The E-R diagram can be seen in Figure 1.
 
-![ER Diagram](final_er_diagram.jpg)  
+![ER Diagram](final_er_diagram.jpg)
 
 \newpage
 
-* For the Customer entity, each customer has a unique customer ID as its primary key, customer name, unique mobile number, home address, credit card number, and unique email address. The Name attribute is a composite of the two attributes named First Name and Last Name. The Address attribute is also a composite of the four attributes: Postcode, House No, Street Name, and Country. We assume that customers can only save one address and one credit card number simultaneously.
+-   For the customer entity, each customer has a unique customer ID as its primary key, customer name, unique mobile number, home address, credit card number, and unique email address. The name attribute is a composite of two attributes named first name and last name. The address attribute is also a composite of four attributes: postcode, house no, street name, and country. We assume that customers can only save one address and one credit card number simultaneously.
 
-* For the Product entity, each product has a unique product ID as its primary key, product name, price, brand, rating, and availability. Product entity has one foreign key, Supplier ID, denoting which supplier it is sold by.
+-   For the product entity, each product has a unique product ID as its primary key, product name, price, brand, rating, and availability. Product entity has one foreign key, supplier ID, denoting which supplier it is sold by.
 
-* For the Categories entity, each category has a unique category ID as its primary key and category name.
+-   For the category entity, each category has a unique category ID as its primary key and category name.
 
-* For the Order Details entity, each order detail has a unique order detail ID as its primary key, discount, and delivery date. The order Details entity has one foreign key, Transaction ID, to ensure order details can be correctly traced back to their related transactions.
+-   For the order detail entity, each order detail has a unique order detail ID as its primary key, discount, and delivery date. The order detail entity has one foreign key, transaction ID, to ensure order detail can be correctly traced back to their related transactions.
 
-* For the Suppliers entity, each supplier has a unique supplier ID as its primary key, supplier name, address, and rating. The Address attribute is also a composite of the four attributes: Postcode, House No, Street Name, and Country.
+-   For the supplier entity, each supplier has a unique supplier ID as its primary key, supplier name, address, and rating. The address attribute is also a composite of four attributes: postcode, house no, street name, and country.
 
-* For the Transactions entity, each transaction has a unique transaction ID as its primary key and payment method. The transactions entity has one foreign key Order Detail ID, which means each transaction will correspond to one or more order details.
+-   For the transaction entity, each transaction has a unique transaction ID as its primary key and payment method. The transaction entity has one foreign key order detail ID, which means each transaction will correspond to one or more order details.
 
-* For the Ads entity, each ad has a unique ad ID as its primary key, duration, and cost. The ad entity has one foreign key, Product ID, showing that each ad promotes a specific product.
+-   For the ad entity, each ad has a unique ad ID as its primary key, duration, and cost. The ad entity has one foreign key, product ID, showing that each ad promotes a specific product.
 
 ### Relationships
 
 In an e-commerce data environment, various relationships are essential for showing interactions. The relationships between different entities in our database are as follows:
 
-1.  Each supplier can supply multiple products, but only one supplier can provide each product (1 to N).
+\newpage
 
-2.  Each category can have multiple products, and each product can be under multiple categories, such as blender under kitchen and electrical appliances (M to N).
+1.  Each supplier can supply multiple products, but only one supplier can provide each product (1 to N). ![Supplier- product relationship set](1.png){fig-align="center" width="150"}
 
-3.  Each product can have multiple ads, but an ad can be for a sole product (1 to N).
+2.  Each customer can order multiple products, and each product can be bought by different customers (M to N). 
+![Customer-product relationship set](2.png){width="150" fig-align="center"}
 
-4.  Each customer can order multiple products, and each order can be bought by different customers (M to N).
+3.  Each category can have multiple products, and each product can be under multiple categories, such as blender under kitchen and electrical appliances (M to N). 
+![Product-category relationship set](3.png){width="150" fig-align="center"}
 
-5.  Each customer can have multiple order details, but each order detail can only be under one customer (1 to N).
+4.  Each product can have multiple ads, but an ad can be for a sole product (1 to N). 
+![Ad-Product relationship set](4.png){width="150" fig-align="center"}
 
-6.  Each product can be within multiple order details, and each order detail can have many products (M to N).
+\newpage
 
-7.  Each transaction can have multiple order details, but each order detail only belongs to one transaction (1 to N).
+5.  Each transaction can only have one order detail, and each order detail only belongs to one transaction (1 to 1). 
+![Order detail-transaction relationship set](5.png){width="150" fig-align="center"}
 
-The relationship set can be seen in Figure 2.
+6.  Each customer can have multiple order details, but each order detail can only be under one customer (1 to N). 
+![Customer-order detail relationship set](6.png){width="150" fig-align="center"}
 
-![Relationship Sets](relationshipSets.jpg)
+7.  Each product can be within multiple order details, and each order detail can have many products (M to N). ![Product-order detail relationship set](7.png){width="150" fig-align="center"}
+
 
 \newpage
 
@@ -64,7 +70,7 @@ The relationship set can be seen in Figure 2.
 
 ### Logical Schema
 
-The logical schema given below outlines the fundamental components of our e-commerce database: customer, product, category, supplier, ads, order, order detail and transaction, as well as their attributes and relationship tables. This is the textual description of our database tables and their columns:
+The logical schema given below outlines the fundamental components of our e-commerce database: customer, product, category, supplier, ad, order, order detail and transaction, as well as their attributes and relationship tables. This is the textual description of our database tables and their columns: 
 
 1.  supplier ([supplier_id]{.underline} (PK), supplier_name, rating, country, street_name, house_no, postcode)
 
@@ -112,9 +118,9 @@ The GitHub repository "Demo_Group10" includes workflows, R scripts and a databas
 
 ## 3.2: GitHub Actions for Continuous Integration
 
-In this part, we set up workflows to implement GitHub actions that perform tasks such as running data validation, updating the database, and automatically running fundamental data analysis.  
+In this part, we set up workflows to implement GitHub actions that perform tasks such as running data validation, updating the database, and automatically running fundamental data analysis.
 
-The new data arrives in the database by executing "Second_Phase_Data_Load.R". The system first controls whether this has a primary key already in the corresponding table or not inside "Second_Phase_Data_Load.R" before appending the new data. If it has a new primary key and unique values for the columns specified in the schema, these entries are accepted, and the database is updated with these proper rows. The remaining entries with invalid columns are rejected and the number of them is kept inside" Invalid_Entries.txt ". After the database is updated, our workflow automatically checks the format of these newly added entries by executing "Validation.R". After completing these checks, our workflow updates the results inside "Validation.R" according to our updated database. Finally, the workflow automatically commits and pushes the processing results to the GitHub repository. 
+The new data arrives in the database by executing "Second_Phase_Data_Load.R". The system first controls whether this has a primary key already in the corresponding table or not inside "Second_Phase_Data_Load.R" before appending the new data. If it has a new primary key and unique values for the columns specified in the schema, these entries are accepted, and the database is updated with these proper rows. The remaining entries with invalid columns are rejected and the number of them is kept inside" Invalid_Entries.txt ". After the database is updated, our workflow automatically checks the format of these newly added entries by executing "Validation.R". After completing these checks, our workflow updates the results inside "Validation.R" according to our updated database. Finally, the workflow automatically commits and pushes the processing results to the GitHub repository.
 
 \newpage
 
@@ -122,7 +128,7 @@ The new data arrives in the database by executing "Second_Phase_Data_Load.R". Th
 
 ## 4.1: Advanced Data Analysis in R
 
-We conducted advanced data analysis based on our e-commerce data in this part. Our analysis focused on several critical areas for understanding customer behaviour, product performance, and market trends. 
+We conducted advanced data analysis based on our e-commerce data in this part. Our analysis focused on several critical areas for understanding customer behaviour, product performance, and market trends.
 
 We started by analysing customers' payment methods to help businesses better meet customer needs and ensure that the process is user-friendly for such payments. Next, we analysed the best sellers of each category, most popular category, the final price of order distribution with respect to payment method, and which product has the highest rating in each category to identify current consumer trends and preferences. In addition, we also analysed the top 20 customers to help us monitor specific trends and metrics. 
 
@@ -130,32 +136,31 @@ We started by analysing customers' payment methods to help businesses better mee
 
 E-commerce databases contain vast amounts of data related to customer behaviour, sales trends, product performance, and more. The data in the visuals below are derived from our e-commerce database and include information about the number of products sold, the highest selling category, frequent payment methods and the most used product within each category in the latest updated database on 16th March. 
 
-![Payment method comparision](payment.jpeg){width=400 fig-align="center"} 
+![Payment method comparision](payment.jpeg){width="400" fig-align="center"}
 
-The bar chart displays the payment methods, with the highest frequencies for debit Cards and the lowest for PayPal. This indicates that customers prefer to use a Debit Card while purchasing products from our site. 
+The bar chart displays the payment methods, with the highest frequencies for debit Cards and the lowest for PayPal. This indicates that customers prefer to use a Debit Card while purchasing products from our site.
 
-![Products by category](best_sellers.jpg){width=400 fig-align="center"}
+![Products by category](best_sellers.jpg){width="400" fig-align="center"}
 
-The bar chart shows quantities of products categorised by colour-coded categories, with 'Multifunction Tracker E Pro' being the most abundant in the 'Pets and Animals' category. 
+The bar chart shows quantities of products categorised by colour-coded categories, with 'Multifunction Tracker E Pro' being the most abundant in the 'Pets and Animals' category.
 
-![Popular category ](top_category.jpeg){width=400 fig-align="center"}
+![Popular category](top_category.jpeg){width="400" fig-align="center"}
 
-The above visual illustrates the popularity of different categories based on our latest database analysis. We can identify that the most popular category is 'Fitness' followed by 'Pets and Animals'. The least favourite category on our site is 'Gaming'.	  
+The above visual illustrates the popularity of different categories based on our latest database analysis. We can identify that the most popular category is 'Fitness' followed by 'Pets and Animals'. The least favourite category on our site is 'Gaming'.
 
-![Distribution of orders](basket_price.jpeg){width=400 fig-align="center"}
+![Distribution of orders](basket_price.jpeg){width="400" fig-align="center"}
 
 We can understand from the visual that most orders are concentrated in the lower price ranges (towards the left side of the histogram), which suggests that cheaper items are more commonly purchased.
 
-Credit card payments (red) are the most popular across all price ranges, followed by debit cards (green) and PayPal (cyan). Payment methods such as Pay at Door (blue) and Transfer (magenta) are also used but less than credit/debit cards and PayPal. Voucher payments (yellow) are the least represented in this dataset, indicating they are the least used payment method among the customers represented in this data. The plot also shows that as the price increases, the frequency of orders decreases, which is typical in consumer behaviour as higher-priced items tend to be purchased less frequently. 
+Credit card payments (red) are the most popular across all price ranges, followed by debit cards (green) and PayPal (cyan). Payment methods such as Pay at Door (blue) and Transfer (magenta) are also used but less than credit/debit cards and PayPal. Voucher payments (yellow) are the least represented in this dataset, indicating they are the least used payment method among the customers represented in this data. The plot also shows that as the price increases, the frequency of orders decreases, which is typical in consumer behaviour as higher-priced items tend to be purchased less frequently.
 
-We have three CSV files named – 'top 20 customers', 'most_popular_category' and 'highest_rating_per_category, which help us to monitor specific trends and metrics. This information helps us to understand the current market better.  
+We have three CSV files named – 'top 20 customers', 'most_popular_category' and 'highest_rating_per_category, which help us to monitor specific trends and metrics. This information helps us to understand the current market better.
 
 # Challenges
 
-Ecommerce databases often involve complex data models due to the variety of entities and relationships involved. So, designing a database, choosing the right entities, and figuring out the proper relationships while maintaining data integrity was challenging. In the data generation stage, it was important to ensure quality of generated data. Since randomly generated data may not always reflect the real-world scenarios accurately and can lead to inconsistent or unrealistic data, validating and verifying the generated data was a challenge to the project. Apart from that, we have a derived column which is stored as view, so it was important to validate derived column values against the source data and ensure that the calculations accurately reflect the intended logic. Overall, addressing these challenges required proper planning and validation to ensure the integrity and accuracy of our Ecommerce database.  
+Ecommerce databases often involve complex data models due to the variety of entities and relationships involved. So, designing a database, choosing the right entities, and figuring out the proper relationships while maintaining data integrity was challenging. In the data generation stage, it was important to ensure quality of generated data. Since randomly generated data may not always reflect the real-world scenarios accurately and can lead to inconsistent or unrealistic data, validating and verifying the generated data was a challenge to the project. Apart from that, we have a derived column which is stored as view, so it was important to validate derived column values against the source data and ensure that the calculations accurately reflect the intended logic. Overall, addressing these challenges required proper planning and validation to ensure the integrity and accuracy of our Ecommerce database.
 
-
-# Conclusion 
+# Conclusion
 
 It is essential in business to analyze and track data daily to implement necessary actions
 
@@ -165,7 +170,7 @@ It is essential in business to analyze and track data daily to implement necessa
 
 ## Appendix A. Physical Schema
 
-``` {r eval=FALSE}
+```{r eval=FALSE}
 library(dplyr)
 library(tidyr)
 library(fakir)
@@ -1390,14 +1395,3 @@ dbExecute(my_db, cat_id_in)
 dbDisconnect(my_db)
 
 ```
-
-
-
-
-
-
-
-
-
-
-
