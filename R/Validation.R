@@ -91,7 +91,7 @@ print(invalid_counts_customer)
 # duplicates 
 
 
-customer_duplicates <- dbGetQuery(my_db, "SELECT customer_id, count(*) from customer group by customer_id having count(*) > 1")
+customer_duplicates <- dbGetQuery(my_db, "SELECT customer_id, COUNT(*) FROM customer GROUP BY customer_id HAVING COUNT(*) > 1")
  print(paste("No:of duplicates for customer table is ",nrow(customer_duplicates)))
 
 
@@ -165,7 +165,7 @@ print(invalid_counts_supplier)
 
 # duplicates 
 
-supplier_duplicates <- dbGetQuery(my_db, "SELECT supplier_id, count(*) from supplier group by supplier_id having count(*) > 1")
+supplier_duplicates <- dbGetQuery(my_db, "SELECT supplier_id, COUNT(*) FROM supplier GROUP BY supplier_id HAVING COUNT(*) > 1")
 print(paste("No:of duplicates for supplier table is ",nrow(supplier_duplicates)))
 
 
@@ -225,7 +225,7 @@ print(invalid_counts_ad)
 
 # duplicates 
 
-ad_duplicates <- dbGetQuery(my_db, "SELECT ad_id, count(*) from ad group by ad_id having count(*) > 1")
+ad_duplicates <- dbGetQuery(my_db, "SELECT ad_id, COUNT(*) FROM ad GROUP BY ad_id HAVING COUNT(*) > 1")
 print(paste("No:of duplicates for ad table is ",nrow(ad_duplicates)))
 
 
@@ -255,7 +255,7 @@ print(invalid_counts_category)
 
 # duplicates 
 
-category_duplicates <- dbGetQuery(my_db, "SELECT category_id, count(*) from category group by category_id having count(*) > 1")
+category_duplicates <- dbGetQuery(my_db, "SELECT category_id, COUNT(*) FROM category GROUP BY category_id HAVING COUNT(*) > 1")
 print(paste("No:of duplicates for category table is ",nrow(category_duplicates)))
 
 
@@ -281,7 +281,7 @@ validate_payment_method <- function(payment_method) {
 
 # checking payment methods other than listed and setting it to others
 pay_method  <- "
-  UPDATE 'transaction' SET payment_method = 'Others' where payment_method not in ('Transfer', 'PayPal','Credit Card','Debit Card','Pay at Door', 'Voucher');
+  UPDATE 'transaction' SET payment_method = 'Others' WHERE payment_method NOT IN ('Transfer', 'PayPal','Credit Card','Debit Card','Pay at Door', 'Voucher');
 "
 dbExecute(my_db, pay_method)
 
@@ -297,7 +297,7 @@ print(invalid_counts_transaction)
 
 # duplicates 
 
-transaction_duplicates <- dbGetQuery(my_db, "SELECT transaction_id, count(*) from 'transaction' group by transaction_id having count(*) > 1")
+transaction_duplicates <- dbGetQuery(my_db, "SELECT transaction_id, COUNT(*) FROM 'transaction' GROUP BY transaction_id HAVING COUNT(*) > 1")
 print(paste("No:of duplicates for transaction table is ",nrow(transaction_duplicates)))
 
 
@@ -342,7 +342,7 @@ print(invalid_counts_order_detail)
 
 # duplicates 
 
-order_detail_duplicates <- dbGetQuery(my_db, "SELECT order_detail_id, count(*) from order_detail group by order_detail_id having count(*) > 1")
+order_detail_duplicates <- dbGetQuery(my_db, "SELECT order_detail_id, COUNT(*) FROM order_detail GROUP BY order_detail_id HAVING COUNT(*) > 1")
 print(paste("No:of duplicates for order_detail table is ",nrow(order_detail_duplicates)))
 
 
@@ -407,7 +407,7 @@ print(invalid_counts_product)
 
 # duplicates 
 
-product_duplicates <- dbGetQuery(my_db, "SELECT product_id, count(*) from product group by product_id having count(*) > 1")
+product_duplicates <- dbGetQuery(my_db, "SELECT product_id, COUNT(*) FROM product GROUP BY product_id HAVING COUNT(*) > 1")
 print(paste("No:of duplicates for product table is ",nrow(product_duplicates)))
 
 #Referential Integrity
