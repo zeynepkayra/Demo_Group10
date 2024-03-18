@@ -98,7 +98,7 @@ write.csv(most_popular_category ,"Data_Analysis/most_popular_category.csv",
 top_cat <- ggplot(category_counts, aes(x = reorder(category_name, -count), y = count)) +
   geom_bar(stat = "identity", fill = "skyblue") +
   labs(x = "Category", y = "Number of Products", 
-       caption = "Popularity of Categories") +
+       caption = "Figure 11. Popularity of Categories") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   coord_flip()
 
@@ -116,7 +116,7 @@ transaction_table <- tables[["transaction"]]
 transaction_table <- left_join(transaction_table, view_tot, by = 'order_detail_id')
 basket <- ggplot(transaction_table, aes(final_price, fill = payment_method)) +
   geom_histogram(binwidth = 2000) +
-  labs(caption = 'Distribution of Orders based on Payment Method', 
+  labs(caption = 'Figure 12. Distribution of Orders based on Payment Method', 
        x = 'Price', y = 'Frequency') 
 
 # Save the plot
