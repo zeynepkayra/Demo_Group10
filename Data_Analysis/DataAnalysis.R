@@ -28,7 +28,8 @@ joint_order_table <- tables[["joint_order"]]
 transaction_table <- tables[["transaction"]]
 payment_plot <- ggplot(transaction_table, aes(x = payment_method))+
   geom_bar(fill = 'indianred3') +
-  labs(x = "Payment Method", y = "Count")
+  labs(x = "Payment Method", y = "Count", 
+       caption = "Figure 9. Distribution of Payment Method")
 
 # Save the plot
 ggsave("Data_Analysis/payment.jpeg", plot = payment_plot, width = 10, height = 6, dpi = 300)
@@ -56,7 +57,8 @@ best_sellers <- bsec %>%
 bests <- ggplot(best_sellers) +
   geom_bar(aes(x = product_name, y = total_quantity, fill = category_name), 
            stat = "identity") + 
-  labs(x = "Products", y = "Quantity") +
+  labs(x = "Products", y = "Quantity",
+       caption = "Figure 10. Best Sellers for Each Category") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # Save the plot
@@ -89,12 +91,14 @@ print(paste("The most popular category is:", most_popular_category))
 
 # Writing it into the csv file
 
-write.csv(most_popular_category ,"most_popular_category.csv", row.names = FALSE)
+write.csv(most_popular_category ,"Data_Analysis/most_popular_category.csv", 
+          row.names = FALSE)
 
 
 top_cat <- ggplot(category_counts, aes(x = reorder(category_name, -count), y = count)) +
   geom_bar(stat = "identity", fill = "skyblue") +
-  labs(x = "Category", y = "Number of Products", title = "Popularity of Categories") +
+  labs(x = "Category", y = "Number of Products", 
+       caption = "Popularity of Categories") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   coord_flip()
 
@@ -112,7 +116,8 @@ transaction_table <- tables[["transaction"]]
 transaction_table <- left_join(transaction_table, view_tot, by = 'order_detail_id')
 basket <- ggplot(transaction_table, aes(final_price, fill = payment_method)) +
   geom_histogram(binwidth = 2000) +
-  labs(title = 'Distribution of Orders based on Payment Method', x = 'Price', y = 'Frequency') 
+  labs(caption = 'Distribution of Orders based on Payment Method', 
+       x = 'Price', y = 'Frequency') 
 
 # Save the plot
 ggsave("Data_Analysis/basket_price.jpeg", plot = basket, width = 10, height = 6, dpi = 300)
@@ -122,7 +127,8 @@ ggsave("Data_Analysis/basket_price.jpeg", plot = basket, width = 10, height = 6,
 # Top 20 customers 
 
 # Join the joint_order table with the customer_table to include customer names
-customer_order_join <- inner_join(joint_order_table, customer_table, by = "customer_id")
+customer_order_join <- inner_join(joint_order_table, customer_table, 
+                                  by = "customer_id")
 
 # Aggregate the data to count the number of orders per customer
 customer_order_counts <- customer_order_join %>%
@@ -137,11 +143,8 @@ top_20_customers <- head(customer_order_counts, 20)
 print(top_20_customers)
 
 # Optionally, you can save the top 20 customers to a CSV file
-write.csv(top_20_customers, "Data_Analysis/top_20_customers.csv", row.names = FALSE)
-
-
-
-
+write.csv(top_20_customers, "Data_Analysis/top_20_customers.csv", 
+          row.names = FALSE)
 
 ## -----------------------------------------------------------------------
 # which product has the highest rating in each category
