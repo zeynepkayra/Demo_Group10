@@ -8,7 +8,7 @@ toc: true
 
 # Introduction
 
-This report reveals the database system of an e-commerce company called “Papa’s Collection” and explains its automated integration inside GitHub. The system is designed with a comprehensive database structure that comprises seven crucial entities. Each entity is crafted with various attributes and relationships to facilitate an efficient, user-friendly experience. Hence, this report will focus on database design, schema creation, data generation, pipeline, and advanced data analysis.
+This report reveals the database system of our e-commerce company called “Papa’s Collection” and explains its automated integration inside GitHub. The system is designed with a comprehensive database structure that comprises seven crucial entities. Each entity is crafted with various attributes and relationships to facilitate an efficient, user-friendly experience. Hence, this report will focus on database design, schema creation, data generation, pipeline, and advanced data analysis.
 
 # Part 1: Database Design and Implementation
 
@@ -88,7 +88,7 @@ The logical schema given below outlines the fundamental components of our e-comm
 
 Using the logical schema, the physical schema is generated using RSQLite in R. It can be seen as follows:
 
-```{r echo=FALSE, warning=FALSE}
+```{r warning=FALSE, message=FALSE}
 library(dplyr)
 library(tidyr)
 library(fakir)
@@ -103,7 +103,7 @@ schema_db <- RSQLite::dbConnect(RSQLite::SQLite(), "ECommerce.db")
 
 ```
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo = T, results = 'hide', warning=FALSE}
 # Creating supplier table
 create_supplier <- '
   CREATE TABLE IF NOT EXISTS "supplier" (
@@ -120,7 +120,7 @@ create_supplier <- '
 dbExecute(schema_db, create_supplier)
 ```
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo = T, results = 'hide', warning=FALSE}
 # Creating product table
 create_product <- '
 CREATE TABLE IF NOT EXISTS "product" (
@@ -138,7 +138,7 @@ CREATE TABLE IF NOT EXISTS "product" (
 dbExecute(schema_db, create_product)
 ```
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo = T, results = 'hide', warning=FALSE}
 # Creating customer table
 create_customer <- '
 CREATE TABLE IF NOT EXISTS "customer" (
@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS "customer" (
 dbExecute(schema_db, create_customer)
 ```
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo = T, results = 'hide', warning=FALSE}
 # Creating ad table
 create_ad <- '
 CREATE TABLE IF NOT EXISTS "ad" (
@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS "ad" (
 dbExecute(schema_db, create_ad)
 ```
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo = T, results = 'hide', warning=FALSE}
 # Creating category table
 create_category <- '
 CREATE TABLE IF NOT EXISTS "category" (
@@ -185,7 +185,7 @@ CREATE TABLE IF NOT EXISTS "category" (
 dbExecute(schema_db, create_category)
 ```
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo = T, results = 'hide', warning=FALSE}
 # Creating joint_in table
 create_joint_in <- '
 CREATE TABLE IF NOT EXISTS "joint_in" (
@@ -198,7 +198,7 @@ CREATE TABLE IF NOT EXISTS "joint_in" (
 dbExecute(schema_db, create_joint_in)
 ```
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo = T, results = 'hide', warning=FALSE}
 # creating transaction table
 create_transaction <- '
 CREATE TABLE IF NOT EXISTS "transaction" (
@@ -212,7 +212,7 @@ CREATE TABLE IF NOT EXISTS "transaction" (
 dbExecute(schema_db, create_transaction)
 ```
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo = T, results = 'hide', warning=FALSE}
 create_order_detail <- '
 CREATE TABLE IF NOT EXISTS "order_detail" (
   "order_detail_id" INTEGER PRIMARY KEY,
@@ -226,7 +226,7 @@ CREATE TABLE IF NOT EXISTS "order_detail" (
 dbExecute(schema_db, create_order_detail)
 ```
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo = T, results = 'hide', warning=FALSE}
 # Creating joint_order table
 create_joint_order <- '
 CREATE TABLE IF NOT EXISTS "joint_order" (
