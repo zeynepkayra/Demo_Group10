@@ -1136,7 +1136,8 @@ joint_order_table <- tables[["joint_order"]]
 transaction_table <- tables[["transaction"]]
 payment_plot <- ggplot(transaction_table, aes(x = payment_method))+
   geom_bar(fill = 'indianred3') +
-  labs(x = "Payment Method", y = "Count")
+  labs(x = "Payment Method", y = "Count", 
+       caption = "Figure 9. Distribution of Payment Method")
 
 payment_plot
 ```
@@ -1164,7 +1165,8 @@ best_sellers <- bsec %>%
 bests <- ggplot(best_sellers) +
   geom_bar(aes(x = product_name, y = total_quantity, fill = category_name), 
            stat = "identity") + 
-  labs(x = "Products", y = "Quantity") +
+  labs(x = "Products", y = "Quantity",
+       caption = "Figure 10. Best Sellers for Each Category") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 bests
 ```
@@ -1201,7 +1203,8 @@ write.csv(most_popular_category ,"most_popular_category.csv", row.names = FALSE)
 
 top_cat <- ggplot(category_counts, aes(x = reorder(category_name, -count), y = count)) +
   geom_bar(stat = "identity", fill = "skyblue") +
-  labs(x = "Category", y = "Number of Products", title = "Popularity of Categories") +
+  labs(x = "Category", y = "Number of Products", title = "Popularity of Categories", 
+       caption = "Figure 11. Popularity of Categories") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   coord_flip()
 top_cat
@@ -1219,7 +1222,8 @@ transaction_table <- tables[["transaction"]]
 transaction_table <- left_join(transaction_table, view_tot, by = 'order_detail_id')
 basket <- ggplot(transaction_table, aes(final_price, fill = payment_method)) +
   geom_histogram(binwidth = 2000) +
-  labs(title = 'Distribution of Orders based on Payment Method', x = 'Price', y = 'Frequency') 
+  labs(title = 'Price based on Payment Method', x = 'Price', y = 'Frequency', 
+       caption = 'Figure 12. Distribution of Order Prices based on Payment Method') 
 basket
 ```
 
